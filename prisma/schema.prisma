@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String  @id @default(uuid())
+  fullname     String  @db.VarChar(100)
+  email        String  @unique @db.VarChar(100)
+  password     String
+  refreshToken String?
+  status       Boolean @default(true)
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+  roles     UserRole[]
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@index([email])
+  @@map("users")
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String @db.VarChar(128)
+  code String @db.VarChar(64)
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+  users       UserRole[]
+  permissions RolePermission[]
+  menus       RoleMenu[]
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@map("roles")
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@map("user_roles")
+}
+
+model Permission {
+  id     String @id @default(uuid())
+  name   String @db.VarChar(128)
+  code   String @unique() @db.VarChar(64)
+  method String @db.VarChar(64)
+  path   String @db.VarChar(128)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  roles RolePermission[]
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  permissionId String
+  roleId       String
+
+  role       Role       @relation(fields: [roleId], references: [id])
+  permission Permission @relation(fields: [permissionId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model Menu {
+  id        String     @id @default(uuid())
+  title     String
+  isGroup   Boolean?   @default(false)
+  icon      String?
+  path      String?
+  parentId  String?
+  order     Int        @default(1)
+  parent    Menu?      @relation("MenuToSubmenu", fields: [parentId], references: [id])
+  children  Menu[]     @relation("MenuToSubmenu")
+  roles     RoleMenu[] // many-to-many
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@map("menus")
+}
+
+model RoleMenu {
+  roleId String
+  menuId String
+
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@id([roleId, menuId]) // composite key
+  @@map("role_menus")
+}

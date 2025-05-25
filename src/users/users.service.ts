@@ -40,7 +40,8 @@ export class UsersService {
           status: parseBoolean(query?.status),
           OR: query?.search
             ? [
-                { fullname: { contains: query.search, mode: 'insensitive' } },
+                { firstname: { contains: query.search, mode: 'insensitive' } },
+                { lastname: { contains: query.search, mode: 'insensitive' } },
                 { email: { contains: query.search, mode: 'insensitive' } },
               ]
             : undefined,
@@ -48,7 +49,8 @@ export class UsersService {
         orderBy,
         select: {
           id: true,
-          fullname: true,
+          firstname: true,
+          lastname: true,
           email: true,
           status: true,
           roles: {
@@ -75,7 +77,8 @@ export class UsersService {
       where: { id },
       select: {
         id: true,
-        fullname: true,
+        firstname: true,
+        lastname: true,
         email: true,
         status: true,
         roles: {
@@ -99,7 +102,8 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data: {
-        fullname: body.fullname,
+        firstname: body.firstname,
+        lastname: body.lastname,
         status: body.status,
       },
       select: {

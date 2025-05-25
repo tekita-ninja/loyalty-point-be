@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { PermissionGuard } from 'src/auth/auth.guard';
 
 @UseGuards(AuthGuard('jwt'), PermissionGuard)
-@Controller('role-permissions')
+@Controller('api/role-permissions')
 export class RolePermissionsController {
   constructor(
     private readonly rolePermissionsService: RolePermissionsService,

@@ -84,7 +84,9 @@ export class AuthService {
     return {
       user: {
         id: user.id,
-        fullname: user.fullname,
+        phone: user.phone,
+        firstname: user.firstname,
+        lastname: user.lastname,
         roles: roles.map((i) => i.role.name),
       },
       accessToken,
@@ -169,7 +171,9 @@ export class AuthService {
       select: {
         id: true,
         email: true,
-        fullname: true,
+        phone: true,
+        firstname: true,
+        lastname: true,
       },
     });
     if (!user) {

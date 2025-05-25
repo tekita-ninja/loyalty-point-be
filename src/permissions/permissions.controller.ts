@@ -19,7 +19,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { HttpAdapterHost } from '@nestjs/core';
 import { PermissionGuard } from 'src/auth/auth.guard';
 @UseGuards(AuthGuard('jwt'), PermissionGuard)
-@Controller('permissions')
+@Controller('api/permissions')
 export class PermissionsController {
   constructor(
     private readonly permissionsService: PermissionsService,

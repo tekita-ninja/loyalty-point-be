@@ -17,7 +17,7 @@ import { MenusService } from './menus.service';
 import { PermissionGuard } from 'src/auth/auth.guard';
 
 @UseGuards(AuthGuard('jwt'), PermissionGuard)
-@Controller('menus')
+@Controller('api/menus')
 export class MenusController {
   constructor(private readonly menusService: MenusService) {}
 

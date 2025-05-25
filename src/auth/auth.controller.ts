@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import { SignInDto, SignUpDto } from './dto/auth.dto';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 import { Request } from 'express';
-@Controller('auth')
+@Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

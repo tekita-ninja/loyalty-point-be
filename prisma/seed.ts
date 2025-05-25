@@ -5,6 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { permissionData } from '../data/permissions';
 const prisma = new PrismaClient();
 async function createRole() {
+  const existing = await prisma.role.findFirst({ where: { code: 'SUPER' } });
+  if (existing) return existing;
   return await prisma.role.create({
     data: {
       name: 'SUPER',
@@ -13,15 +15,25 @@ async function createRole() {
   });
 }
 async function createUser() {
+  const existing = await prisma.user.findUnique({ where: { email: 'super@gmail.com' } });
+  if (existing) return existing;
+
   return await prisma.user.create({
     data: {
+      firstname: 'Super',
+      lastname: 'User',
       email: 'super@gmail.com',
-      fullname: 'Super User',
       password: await bcrypt.hash('super@123', 10),
+      phone: "1111111111",
+      gender: "MALE",
+      birthDate: new Date("1990-01-01"),
     },
   });
 }
 async function createUserRole(userId: string, roleId: string) {
+  const existing = await prisma.userRole.findFirst({ where: { userId, roleId } });
+  if (existing) return existing;
+
   return prisma.userRole.create({
     data: {
       roleId: roleId,
@@ -30,6 +42,9 @@ async function createUserRole(userId: string, roleId: string) {
   });
 }
 async function createPermissions() {
+  const count = await prisma.permission.count();
+  if (count > 0) return;
+
   return prisma.permission.createMany({
     data: permissionData,
   });
@@ -38,6 +53,9 @@ async function getPermissions() {
   return prisma.permission.findMany();
 }
 async function createRoleHeaderMenu() {
+  const existing = await prisma.menu.findFirst({ where: { title: 'Super', isGroup: true } });
+  if (existing) return existing;
+
   return prisma.menu.create({
     data: {
       title: 'Super',
@@ -47,6 +65,11 @@ async function createRoleHeaderMenu() {
 }
 
 async function createMenuRole(headerMenu: string) {
+  const existing = await prisma.menu.findFirst({
+    where: { title: 'Roles', parentId: headerMenu },
+  });
+  if (existing) return existing;
+
   return prisma.menu.create({
     data: {
       title: 'Roles',
@@ -58,6 +81,9 @@ async function createMenuRole(headerMenu: string) {
   });
 }
 async function createChildRoles(parentId: string) {
+  const existing = await prisma.menu.findMany({ where: { parentId } });
+  if (existing.length > 0) return existing;
+
   return prisma.menu.createMany({
     data: [
       {
@@ -84,6 +110,8 @@ async function createChildRoles(parentId: string) {
     ],
   });
 }
+
+
 async function getChildRoles() {
   return prisma.menu.findMany();
 }
@@ -93,19 +121,41 @@ async function getChildRoles() {
 async function createRolePermissions(
   data: { roleId: string; permissionId: string }[],
 ) {
+  const existing = await prisma.rolePermission.findMany({
+    where: { roleId: data[0].roleId },
+  });
+
+  if (existing.length > 0) return existing;
+
   return prisma.rolePermission.createMany({
     data,
+    skipDuplicates: true,
   });
 }
 // CREATE RoleMenus
 async function createRoleMenu(data: { roleId: string; menuId: string }[]) {
   // console.log(data);
+
+  const existing = await prisma.roleMenu.findMany({
+    where: { roleId: data[0].roleId },
+  });
+
+  if (existing.length > 0) return existing;
+
   return prisma.roleMenu.createMany({
     data,
     skipDuplicates: true,
   });
 }
 async function createMenuMenuManagement(roleId: string, parentId: string) {
+  const existing = await prisma.menu.findFirst({
+    where: {
+      title: 'Menu Management',
+      parentId,
+    },
+  });
+  if (existing) return existing;
+
   await prisma.menu.create({
     data: {
       title: 'Menu Management',
@@ -158,6 +208,7 @@ async function main() {
     rolePermissions,
     roleMenus,
   });
+  console.log('✅ Seeding complete.');
 }
 
 main()

@@ -18,7 +18,7 @@ import { PaginationDto } from 'src/common/pagination/dto/pagination.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { PermissionGuard } from 'src/auth/auth.guard';
 @UseGuards(AuthGuard('jwt'), PermissionGuard)
-@Controller('roles')
+@Controller('api/roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 

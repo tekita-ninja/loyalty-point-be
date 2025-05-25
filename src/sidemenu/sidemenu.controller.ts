@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { CurrentUserId } from 'src/common/decorators/current-user.decorator';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('sidemenu')
+@Controller('api/sidemenu')
 export class SidemenuController {
   constructor(private readonly sidemenuService: SidemenuService) {}
   @Get()

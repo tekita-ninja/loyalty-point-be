@@ -13,24 +13,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
+
 model User {
   id           String  @id @default(uuid())
-  fullname     String  @db.VarChar(100)
+  firstname    String  @db.VarChar(100)
+  lastname     String  @db.VarChar(100)
   email        String  @unique @db.VarChar(100)
-  password     String
+  password     String  @db.VarChar(100)
+  phone        String  @unique @db.VarChar(100)
+  gender       Gender
+  birthDate    DateTime 
   refreshToken String?
   status       Boolean @default(true)
+  transaction  Transaction[]
+  rankingId    String?
+
+  ranking      Ranking? @relation(fields: [rankingId], references: [id])
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  deletedAt DateTime?
+  deletedAt DateTime?  
   roles     UserRole[]
 
   createdBy String?
   updatedBy String?
   deletedBy String?
 
-  @@index([email])
+  @@index([firstname, lastname,  email, phone])
   @@map("users")
 }
 
@@ -50,7 +63,7 @@ model Role {
   updatedBy String?
   deletedBy String?
 
-  @@map("roles")
+  @@map("master_roles")
 }
 
 model UserRole {
@@ -89,7 +102,7 @@ model Permission {
   updatedBy String?
   deletedBy String?
 
-  @@map("permissions")
+  @@map("master_permissions")
 }
 
 model RolePermission {
@@ -130,7 +143,7 @@ model Menu {
   updatedBy String?
   deletedBy String?
 
-  @@map("menus")
+  @@map("master_menus")
 }
 
 model RoleMenu {
@@ -151,3 +164,172 @@ model RoleMenu {
   @@id([roleId, menuId]) // composite key
   @@map("role_menus")
 }
+
+model Ranking {
+  id           String @id @default(uuid())
+  name         String @db.VarChar(100)
+  minPoints    Int
+  minSpendings Int
+
+  users        User[]  
+  benefits     RankingBenefit[]
+  promotions   Promotion[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String? 
+  updatedBy String?
+  deletedBy String?
+
+  @@map("master_ranking")
+}
+
+model RankingBenefit {
+  id                String @id @default(uuid())
+  rankingId        String
+  benefitId        String
+
+  ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+  benefit Benefit @relation(fields: [benefitId], references: [id], onDelete: Cascade)
+
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String? 
+  updatedBy String?
+  deletedBy String?
+
+  @@map("ranking_benefits")
+}
+
+model Benefit {
+  id                String @id @default(uuid())
+  title             String @db.VarChar(100)
+  description       String @db.Text
+
+  ranking     RankingBenefit[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String? 
+  updatedBy String?
+  deletedBy String?
+
+  @@map("master_benefits")
+
+}
+
+model Promotion {
+  id                String @id @default(uuid())
+  rankingId         String
+  title     String @db.VarChar(100)
+  subtitle  String @db.VarChar(100)
+  description String @db.Text
+  startDate DateTime
+  endDate   DateTime
+  isPush    Int
+
+  ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String? 
+  updatedBy String?
+  deletedBy String?
+
+  @@map("master_promotions")
+}
+
+model Category {
+  id      String @id @default(uuid())
+  name    String
+
+  rewards Reward[]
+
+  @@map("master_categories")
+}
+
+model Location {
+  id        String @id @default(uuid())
+  name      String @db.VarChar(100)
+  address   String @db.Text
+  latitude  Float
+  longitude Float
+
+  rewards   Reward[]
+
+  @@map("master_location")
+}
+
+model Reward {
+  id    String @id @default(uuid())
+  categoryId  String
+  locationId  String
+  name        String  @db.VarChar(100)
+  urlPicture  String  @db.VarChar(100)
+  // price       Decimal @db.Decimal(15, 2)
+  price       Int
+  transaction Transaction[]
+
+  location Location @relation(fields: [locationId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@map("master_rewards")
+}
+
+model Transaction {
+  id          String @id @default(uuid())
+  rewardId    String
+  userId      String
+  note        String @db.VarChar(255)
+  status      Int
+  cutPoint    Int
+  expired     DateTime
+  customerPoint CustomerPoint? @relation("TransactionToCustomerPoint")
+
+  reward  Reward @relation(fields: [rewardId], references: [id])
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@map("master_transactions")
+}
+
+model RulePoint {
+  id          String @id @default(uuid())
+  multiplier  Decimal @db.Decimal(10,6)
+  point       Int
+  price       Decimal @db.Decimal(15,2)
+  isActive    Int
+
+  customerPoint CustomerPoint[]
+
+  @@map("master_rule_points")
+}
+
+model CustomerPoint {
+  id          String @id @default(uuid())
+  userId      String 
+  rulePointId String?
+  transactionId  String?  @unique()
+  note        String @db.VarChar(255)  
+  price       Decimal? @db.Decimal(15,2)
+  point       Int
+  expired     DateTime?
+
+  rulePoint  RulePoint? @relation(fields: [rulePointId], references: [id])
+  transaction Transaction? @relation("TransactionToCustomerPoint", fields: [transactionId], references: [id])
+
+}
+ 
+
+
+
+
+

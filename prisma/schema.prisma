@@ -416,7 +416,6 @@ model CustomerPoint {
 
   @@map("customer_point")
 }
- 
 
 
 

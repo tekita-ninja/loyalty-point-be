@@ -173,7 +173,7 @@ model Ranking {
 
   users        User[]  
   benefits     RankingBenefit[]
-  promotions   Promotion[]
+  promotions   PromotionRanking[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -203,7 +203,7 @@ model RankingBenefit {
   updatedBy String?
   deletedBy String?
 
-  @@map("ranking_benefits")
+  @@map("ranking_benefit")
 }
 
 model Benefit {
@@ -225,9 +225,27 @@ model Benefit {
 
 }
 
+model PromotionRanking {
+  id                String @id @default(uuid())
+  rankingId   String
+  promotionId String
+
+  ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  createdBy String? 
+  updatedBy String?
+  deletedBy String?
+
+  @@map("promotion_ranking")
+}
+
 model Promotion {
   id                String @id @default(uuid())
-  rankingId         String
   title     String @db.VarChar(100)
   subtitle  String @db.VarChar(100)
   description String @db.Text
@@ -235,7 +253,7 @@ model Promotion {
   endDate   DateTime
   isPush    Int
 
-  ranking Ranking @relation(fields: [rankingId], references: [id], onDelete: Cascade)
+  ranking PromotionRanking[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -254,6 +272,14 @@ model Category {
 
   rewards Reward[]
 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
   @@map("master_categories")
 }
 
@@ -264,23 +290,61 @@ model Location {
   latitude  Float
   longitude Float
 
-  rewards   Reward[]
+  rewards   RewardLocation[]
 
-  @@map("master_location")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@map("master_locations")
+
+}
+
+model RewardLocation {
+  id         String @id @default(uuid())
+  rewardId String
+  locationId String
+
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+  
+  @@map("reward_location")
+
+
 }
 
 model Reward {
   id    String @id @default(uuid())
   categoryId  String
-  locationId  String
   name        String  @db.VarChar(100)
   urlPicture  String  @db.VarChar(100)
   // price       Decimal @db.Decimal(15, 2)
   price       Int
   transaction Transaction[]
+  location  RewardLocation[]
 
-  location Location @relation(fields: [locationId], references: [id])
   category Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
 
   @@map("master_rewards")
 }
@@ -298,6 +362,14 @@ model Transaction {
   reward  Reward @relation(fields: [rewardId], references: [id])
   user    User   @relation(fields: [userId], references: [id])
 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
   @@map("master_transactions")
 }
 
@@ -309,6 +381,14 @@ model RulePoint {
   isActive    Int
 
   customerPoint CustomerPoint[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
 
   @@map("master_rule_points")
 }
@@ -326,6 +406,15 @@ model CustomerPoint {
   rulePoint  RulePoint? @relation(fields: [rulePointId], references: [id])
   transaction Transaction? @relation("TransactionToCustomerPoint", fields: [transactionId], references: [id])
 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@map("customer_point")
 }
  
 

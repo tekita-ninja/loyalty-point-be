@@ -8,6 +8,8 @@ import { RolePermissionsModule } from './role_permissions/role_permissions.modul
 import { RolesModule } from './roles/roles.module';
 import { SidemenuModule } from './sidemenu/sidemenu.module';
 import { UsersModule } from './users/users.module';
+import { CategoryModule } from './category/category.module';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { UsersModule } from './users/users.module';
     RolePermissionsModule,
     MenusModule,
     SidemenuModule,
+    CategoryModule,
+    LocationModule
   ],
   controllers: [],
   providers: [],

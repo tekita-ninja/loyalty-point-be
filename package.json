@@ -19,9 +19,9 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node prisma/seed.ts",
-    "migration:delete":"rm -rf prisma/migrations",
-    "db:reset":"npx prisma migrate reset --force --skip-seed",
-    "db:init":"npx prisma migrate dev --name init",
+    "migration:delete": "rm -rf prisma/migrations",
+    "db:reset": "npx prisma migrate reset --force --skip-seed",
+    "db:init": "npx prisma migrate dev --name init",
     "db:rebuild": "npm run migration:delete && npm run db:reset && npm run db:init && npm run seed"
   },
   "dependencies": {

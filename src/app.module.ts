@@ -10,6 +10,7 @@ import { SidemenuModule } from './sidemenu/sidemenu.module';
 import { UsersModule } from './users/users.module';
 import { CategoryModule } from './category/category.module';
 import { LocationModule } from './location/location.module';
+import { RewardModule } from './reward/reward.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { LocationModule } from './location/location.module';
     MenusModule,
     SidemenuModule,
     CategoryModule,
-    LocationModule
+    LocationModule,
+    RewardModule
   ],
   controllers: [],
   providers: [],

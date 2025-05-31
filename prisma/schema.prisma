@@ -334,7 +334,7 @@ model Reward {
   // price       Decimal @db.Decimal(15, 2)
   price       Int
   transaction Transaction[]
-  location  RewardLocation[]
+  locations  RewardLocation[]
 
   category Category @relation(fields: [categoryId], references: [id])
 

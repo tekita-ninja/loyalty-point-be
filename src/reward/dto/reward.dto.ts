@@ -13,6 +13,5 @@ export class CreateRewardDto {
     @IsString()
     categoryId: string
     
-    @IsString()
-    locationId: string
+
 }

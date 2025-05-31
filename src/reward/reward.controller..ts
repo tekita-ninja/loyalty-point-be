@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { RewardService } from "./reward.service";
 import { CreateRewardDto } from "./dto/reward.dto";
 
@@ -14,4 +14,10 @@ export class RewardController {
     ){
         return this.rewardService.create(body);
     }
+
+    @Get('all')
+    findAll() {
+        return this.rewardService.findAll()
+    }
+
 }

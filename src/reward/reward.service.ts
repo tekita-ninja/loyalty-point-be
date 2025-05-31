@@ -8,9 +8,36 @@ import { Category, Location } from "@prisma/client";
 export class RewardService {
     constructor(private prismaService: PrismaService){}
 
+    async findAll() {
+        return this.prismaService.reward.findMany({
+            select: {
+                id: true,
+                name: true,
+                urlPicture: true,
+                price: true,
+                category: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                location: {
+                   select: {
+                        location: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
+                   }
+                }
+            }
+        });
+    }
+
     async create(data: CreateRewardDto) {
         await checkDataById<Category>(data.categoryId, this.prismaService.category, 'category')
-        await checkDataById<Location>(data.locationId, this.prismaService.location, 'location')
+        // await checkDataById<Location>(data.locationId, this.prismaService.location, 'location')
 
         return this.prismaService.reward.create({
             data: {
@@ -22,15 +49,6 @@ export class RewardService {
                         id: data.categoryId
                      }
                 },
-                location: {
-                    create: [
-                        {
-                            location: {
-                                connect: {id: data.locationId}
-                            }
-                        }
-                    ]
-                }
             },
             select: {
                 id: true,
@@ -42,7 +60,7 @@ export class RewardService {
                         id: true,
                         name: true
                     }
-                }
+                },
             }
         })
     }

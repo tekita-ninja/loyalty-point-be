@@ -25,7 +25,6 @@ export class TransformResponseInterceptor<T>
 
     return next.handle().pipe(
       map((data) => {
-        console.log(data);
         if (data && typeof data === 'object' && 'meta' in data) {
           return {
             message: message || 'success',

@@ -42,7 +42,7 @@ export class CategoryController {
   }
 
   @Get()
-  search(@Query() query: QueryParamDto) {
+  async search(@Query() query: QueryParamDto) {
     return this.categoryService.search(query);
   }
 }

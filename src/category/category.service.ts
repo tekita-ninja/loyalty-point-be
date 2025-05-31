@@ -11,7 +11,7 @@ export class CategoryService {
   constructor(private prismaService: PrismaService) {}
 
   async findAll() {
-    return this.prismaService.category.findMany({
+    return await this.prismaService.category.findMany({
       select: {
         id: true,
         name: true,
@@ -20,7 +20,7 @@ export class CategoryService {
   }
 
   async create(data: CreateCategoryDto) {
-    return this.prismaService.category.create({
+    return await this.prismaService.category.create({
       select: {
         id: true,
         name: true,
@@ -31,7 +31,7 @@ export class CategoryService {
 
   async findOne(id: string) {
     await checkDataById<Category>(id, this.prismaService.category);
-    return this.prismaService.category.findUnique({
+    return await this.prismaService.category.findUnique({
       where: {
         id,
       },

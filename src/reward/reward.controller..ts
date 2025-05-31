@@ -17,32 +17,32 @@ export class RewardController {
   constructor(private rewardService: RewardService) {}
 
   @Post()
-  create(@Body() body: CreateRewardDto) {
-    return this.rewardService.create(body);
+  async create(@Body() body: CreateRewardDto) {
+    return await this.rewardService.create(body);
   }
 
   @Get('all')
-  findAll() {
-    return this.rewardService.findAll();
+  async findAll() {
+    return await this.rewardService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.rewardService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.rewardService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() body: UpdateRewardDto) {
-    return this.rewardService.update(id, body);
+  async update(@Param('id') id: string, @Body() body: UpdateRewardDto) {
+    return await this.rewardService.update(id, body);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.rewardService.delete(id);
+  async delete(@Param('id') id: string) {
+    return await this.rewardService.delete(id);
   }
 
   @Get()
-  search(@Query() query: QueryParamDto) {
-    return this.rewardService.search(query);
+  async search(@Query() query: QueryParamDto) {
+    return await this.rewardService.search(query);
   }
 }

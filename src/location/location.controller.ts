@@ -21,45 +21,45 @@ export class LocationController {
   constructor(private locationService: LocationService) {}
 
   @Get('all')
-  findAll() {
-    return this.locationService.findAll();
+  async findAll() {
+    return await this.locationService.findAll();
   }
 
   @Post()
-  create(@Body() body: CreateLocationDto) {
-    return this.locationService.create(body);
+  async create(@Body() body: CreateLocationDto) {
+    return await this.locationService.create(body);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.locationService.findOne(id);
+  async findOne(@Param('id') id: string) {
+    return await this.locationService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() body: UpdateLocationDto) {
-    return this.locationService.update(id, body);
+  async update(@Param('id') id: string, @Body() body: UpdateLocationDto) {
+    return await this.locationService.update(id, body);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.locationService.delete(id);
+  async delete(@Param('id') id: string) {
+    return await this.locationService.delete(id);
   }
 
   @Get()
-  search(@Query() query: QueryParamDto) {
-    return this.locationService.search(query);
+  async search(@Query() query: QueryParamDto) {
+    return await this.locationService.search(query);
   }
 
   @Post('assign-reward')
-  assignReward(@Body() body: AssignRewardDto) {
-    return this.locationService.assignRewards(body);
+  async assignReward(@Body() body: AssignRewardDto) {
+    return await this.locationService.assignRewards(body);
   }
 
   @Get('/:locationId/reward')
-  findManyRewards(
+  async findManyRewards(
     @Param('locationId') locationId: string,
     @Query() query: QueryParamDto,
   ) {
-    return this.locationService.findManyRewards(locationId, query);
+    return await this.locationService.findManyRewards(locationId, query);
   }
 }

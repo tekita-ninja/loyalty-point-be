@@ -22,7 +22,11 @@ export async function checkDataByIds<T extends { id: string }>(
   type = 'Data',
 ): Promise<void> {
   const records = await modelDelegate.findMany({
-    where: { id: { in: ids } },
+    where: { 
+      AND: [
+        {id: { in: ids } }
+      ]
+    },
     select: { id: true },
   });
 

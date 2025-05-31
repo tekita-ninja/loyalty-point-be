@@ -26,10 +26,10 @@ export class AssignRewardDto {
   @ArrayNotEmpty()
   @ArrayUnique()
   @IsString({ each: true })
-  reward_ids: string[];
+  rewardIds: string[];
 
   @IsString()
-  location_id: string;
+  locationId: string;
 }
 
 export class UpdateLocationDto extends PartialType(CreateLocationDto) {}

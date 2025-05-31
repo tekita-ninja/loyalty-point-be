@@ -5,13 +5,17 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Prisma, Reward } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
+import { FileService } from 'src/common/files/files.service';
 
 @Injectable()
 export class RewardService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private fileService: FileService,
+  ) {}
 
   async findAll() {
-    return this.prismaService.reward.findMany({
+    const rewards = await this.prismaService.reward.findMany({
       select: {
         id: true,
         name: true,
@@ -25,23 +29,31 @@ export class RewardService {
         },
       },
     });
+
+    return this.toRewardsResponse(rewards)
   }
 
   async create(data: CreateRewardDto) {
     await checkDataById<Category>(
-      data.category_id,
+      data.categoryId,
       this.prismaService.category,
       'category',
     );
 
-    return this.prismaService.reward.create({
+    if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
+      data.urlPicture = await this.fileService.copyFileFromTemp(
+        data.urlPicture,
+      );
+    }
+
+    const reward = await this.prismaService.reward.create({
       data: {
         name: data.name,
         urlPicture: data.urlPicture,
         price: data.price,
         category: {
           connect: {
-            id: data.category_id,
+            id: data.categoryId,
           },
         },
       },
@@ -58,12 +70,14 @@ export class RewardService {
         },
       },
     });
+
+    return this.toRewardResponse(reward)
   }
 
   async findOne(id: string) {
     await checkDataById<Reward>(id, this.prismaService.reward, 'reward');
 
-    return this.prismaService.reward.findUnique({
+    const reward = await this.prismaService.reward.findUnique({
       where: { id },
       select: {
         id: true,
@@ -91,12 +105,26 @@ export class RewardService {
         },
       },
     });
+
+    return this.toRewardResponse(reward)
   }
 
   async update(id: string, data: UpdateRewardDto) {
     await checkDataById<Reward>(id, this.prismaService.reward, 'reward');
 
-    return this.prismaService.reward.update({
+    await checkDataById<Category>(
+      data.categoryId,
+      this.prismaService.category,
+      'category',
+    );
+
+    if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
+      data.urlPicture = await this.fileService.copyFileFromTemp(
+        data.urlPicture,
+      );
+    }
+
+    const reward = await this.prismaService.reward.update({
       where: { id },
       data,
       select: {
@@ -112,14 +140,18 @@ export class RewardService {
         },
       },
     });
+
+    return this.toRewardResponse(reward)
   }
 
   async delete(id: string) {
     await checkDataById<Reward>(id, this.prismaService.reward, 'reward');
 
-    return this.prismaService.reward.delete({
+    const reward = await this.prismaService.reward.delete({
       where: { id },
     });
+
+    return this.toRewardResponse(reward)
   }
 
   async search(query: QueryParamDto) {
@@ -161,7 +193,7 @@ export class RewardService {
 
     const whereStatement = filter.length > 0 ? { AND: filter } : {};
 
-    return await paginate<Reward, Prisma.RewardFindManyArgs>(
+    const rewards = await paginate<Reward, Prisma.RewardFindManyArgs>(
       this.prismaService.reward,
       {
         where: whereStatement,
@@ -180,5 +212,41 @@ export class RewardService {
         },
       },
     );
+
+    return this.toRewardsResponse(rewards)
+
   }
+
+  toRewardResponse(reward: any) {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    return {
+      ...reward,
+      urlPicture: `${baseUrl}/${reward.urlPicture}`, // full URL hasil gabungan
+    };
+  }
+
+  toRewardsResponse(rewards: any) {
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    
+    if (Array.isArray(rewards)) {
+    return rewards.map(reward => ({
+        ...reward,
+        urlPicture: `${baseUrl}/${reward.urlPicture}`,
+      }));
+    }
+
+    // Jika rewards adalah objek dengan properti data (pagination result)
+    if (Array.isArray(rewards?.data)) {
+      const modifiedData = rewards.data.map(reward => ({
+        ...reward,
+        urlPicture: `${baseUrl}/${reward.urlPicture}`,
+      }));
+
+      return {
+        ...rewards,
+        data: modifiedData,
+      };
+    }
+  }
+
 }

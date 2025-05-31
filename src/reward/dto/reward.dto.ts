@@ -12,7 +12,7 @@ export class CreateRewardDto {
   price: number;
 
   @IsString()
-  category_id: string;
+  categoryId: string;
 }
 
 export class UpdateRewardDto extends PartialType(CreateRewardDto) {}

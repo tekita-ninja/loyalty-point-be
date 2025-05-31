@@ -9,13 +9,17 @@ import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
 import { Location, Prisma, Reward } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
+import { RewardService } from 'src/reward/reward.service';
 
 @Injectable()
 export class LocationService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private rewardService: RewardService
+  ) {}
 
   async findAll() {
-    return this.prismaService.location.findMany({
+    return await this.prismaService.location.findMany({
       select: {
         id: true,
         name: true,
@@ -27,7 +31,7 @@ export class LocationService {
   }
 
   async create(data: CreateLocationDto) {
-    return this.prismaService.location.create({
+    return await this.prismaService.location.create({
       data,
       select: {
         id: true,
@@ -41,7 +45,7 @@ export class LocationService {
 
   async findOne(id: string) {
     await checkDataById<Location>(id, this.prismaService.location);
-    return this.prismaService.location.findUnique({
+    return await this.prismaService.location.findUnique({
       where: { id },
       select: {
         id: true,
@@ -73,7 +77,7 @@ export class LocationService {
 
   async update(id: string, data: UpdateLocationDto) {
     await checkDataById<Location>(id, this.prismaService.location);
-    return this.prismaService.location.update({
+    return await this.prismaService.location.update({
       where: { id },
       data,
       select: {
@@ -88,7 +92,7 @@ export class LocationService {
 
   async delete(id: string) {
     await checkDataById<Location>(id, this.prismaService.location);
-    return this.prismaService.location.delete({
+    return await this.prismaService.location.delete({
       where: { id },
       select: {
         id: true,
@@ -131,20 +135,20 @@ export class LocationService {
 
   async assignRewards(data: AssignRewardDto) {
     await checkDataByIds<Reward>(
-      data.reward_ids,
+      data.rewardIds,
       this.prismaService.reward,
       'reward',
     );
 
     await checkDataById<Location>(
-      data.location_id,
+      data.locationId,
       this.prismaService.location,
       'location',
     );
 
-    const pivotData = data.reward_ids.map((rewardId) => ({
+    const pivotData = data.rewardIds.map((rewardId) => ({
       rewardId,
-      locationId: data.location_id,
+      locationId: data.locationId,
     }));
 
     return await this.prismaService.rewardLocation.createMany({
@@ -191,7 +195,7 @@ export class LocationService {
       });
     }
 
-    return await paginate<Reward, Prisma.RewardFindManyArgs>(
+    const rewards =  await paginate<Reward, Prisma.RewardFindManyArgs>(
       this.prismaService.reward,
       {
         where: { AND: filter },
@@ -210,5 +214,8 @@ export class LocationService {
         },
       },
     );
+
+    return this.rewardService.toRewardsResponse(rewards)
+
   }
 }

@@ -11,6 +11,10 @@ import { UsersModule } from './users/users.module';
 import { CategoryModule } from './category/category.module';
 import { LocationModule } from './location/location.module';
 import { RewardModule } from './reward/reward.module';
+import { FileModule } from './common/files/files.module';
+import { CommonModule } from './common/common.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduleTasksModule } from './common/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -28,6 +32,9 @@ import { RewardModule } from './reward/reward.module';
     CategoryModule,
     LocationModule,
     RewardModule,
+    CommonModule,
+    ScheduleModule.forRoot(),
+    ScheduleTasksModule
   ],
   controllers: [],
   providers: [],

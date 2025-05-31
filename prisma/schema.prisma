@@ -211,7 +211,7 @@ model Benefit {
   title             String @db.VarChar(100)
   description       String @db.Text
 
-  ranking     RankingBenefit[]
+  rankings     RankingBenefit[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -253,7 +253,7 @@ model Promotion {
   endDate   DateTime
   isPush    Int
 
-  ranking PromotionRanking[]
+  rankings PromotionRanking[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -322,7 +322,7 @@ model RewardLocation {
   deletedBy String?
   
   @@map("reward_location")
-
+  @@unique([rewardId, locationId])
 
 }
 
@@ -333,7 +333,7 @@ model Reward {
   urlPicture  String  @db.VarChar(100)
   // price       Decimal @db.Decimal(15, 2)
   price       Int
-  transaction Transaction[]
+  transactions Transaction[]
   locations  RewardLocation[]
 
   category Category @relation(fields: [categoryId], references: [id])
@@ -380,7 +380,7 @@ model RulePoint {
   price       Decimal @db.Decimal(15,2)
   isActive    Int
 
-  customerPoint CustomerPoint[]
+  customerPoints CustomerPoint[]
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt

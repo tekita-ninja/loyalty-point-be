@@ -18,19 +18,21 @@ export class TransformResponseInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<{ message: string; data: T }> {
-    const message =
-      this.reflector.get<string>(RESPONSE_MESSAGE_KEY, context.getHandler());
+    const message = this.reflector.get<string>(
+      RESPONSE_MESSAGE_KEY,
+      context.getHandler(),
+    );
 
     return next.handle().pipe(
       map((data) => {
-        console.log(data)
+        console.log(data);
         if (data && typeof data === 'object' && 'meta' in data) {
           return {
             message: message || 'success',
             data: data.data,
             meta: data.meta,
           };
-        } 
+        }
         return {
           message: message || 'success',
           data,

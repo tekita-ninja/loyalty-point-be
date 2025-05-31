@@ -27,7 +27,7 @@ import { RewardModule } from './reward/reward.module';
     SidemenuModule,
     CategoryModule,
     LocationModule,
-    RewardModule
+    RewardModule,
   ],
   controllers: [],
   providers: [],

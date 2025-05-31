@@ -103,7 +103,7 @@ export class RolesService {
       },
       select: {
         id: true,
-        name: true
+        name: true,
       },
     });
   }

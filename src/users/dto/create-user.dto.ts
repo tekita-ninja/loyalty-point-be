@@ -11,50 +11,68 @@ export class JwtPayload {
   userId: string;
 }
 export class CreateUserDto {
-    @IsNotEmpty() @IsString() @MaxLength(100)
-    firstname: string;
-  
-    @IsNotEmpty() @IsString() @MaxLength(100)
-    lastname: string;
-  
-    @IsNotEmpty() @IsString() @MaxLength(100) @IsEmail()
-    email: string;
-  
-    @IsStrongPassword({ minLength: 6 })
-    password: string;
-  
-    @IsNotEmpty() @IsString()
-    phone: string;
-  
-    @IsNotEmpty() @IsString()
-    gender: Gender;
-  
-    @IsNotEmpty()
-    birthDate: Date;
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  firstname: string;
 
-    @IsNotEmpty()
-    @IsBoolean()
-    status: boolean;
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  lastname: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  @IsEmail()
+  email: string;
+
+  @IsStrongPassword({ minLength: 6 })
+  password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @IsNotEmpty()
+  @IsString()
+  gender: Gender;
+
+  @IsNotEmpty()
+  birthDate: Date;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  status: boolean;
 }
 export class CreateUserByAdminDto {
-  @IsNotEmpty() @IsString() @MaxLength(100)
-    firstname: string;
-  
-    @IsNotEmpty() @IsString() @MaxLength(100)
-    lastname: string;
-  
-    @IsNotEmpty() @IsString() @MaxLength(100) @IsEmail()
-    email: string;
-  
-    @IsStrongPassword({ minLength: 6 })
-    password: string;
-  
-    @IsNotEmpty() @IsString()
-    phone: string;
-  
-    @IsNotEmpty() @IsString()
-    gender: Gender;
-  
-    @IsNotEmpty()
-    birthDate: Date;
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  firstname: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  lastname: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MaxLength(100)
+  @IsEmail()
+  email: string;
+
+  @IsStrongPassword({ minLength: 6 })
+  password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @IsNotEmpty()
+  @IsString()
+  gender: Gender;
+
+  @IsNotEmpty()
+  birthDate: Date;
 }

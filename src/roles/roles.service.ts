@@ -26,7 +26,7 @@ export class RolesService {
   async findMany(query: QueryParamDto) {
     const paginate = createPaginator({
       page: query.page,
-      perPage: query.pageSize,
+      perPage: query.perPage,
     });
     const orderField = query.sortBy || 'id';
     const orderType = query.sortType || 'desc';

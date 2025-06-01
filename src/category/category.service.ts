@@ -30,7 +30,7 @@ export class CategoryService {
   }
 
   async findOne(id: string) {
-    await checkDataById<Category>(id, this.prismaService.category);
+    await checkDataById<Category>(id, this.prismaService.category, 'category');
     return await this.prismaService.category.findUnique({
       where: {
         id,
@@ -43,7 +43,7 @@ export class CategoryService {
   }
 
   async update(id: string, data: UpdateCategoryDto) {
-    await checkDataById<Category>(id, this.prismaService.category);
+    await checkDataById<Category>(id, this.prismaService.category, 'category');
 
     return await this.prismaService.category.update({
       where: { id },
@@ -52,7 +52,7 @@ export class CategoryService {
   }
 
   async delete(id: string) {
-    await checkDataById<Category>(id, this.prismaService.category);
+    await checkDataById<Category>(id, this.prismaService.category, 'category');
 
     return await this.prismaService.category.delete({
       where: { id },
@@ -62,7 +62,7 @@ export class CategoryService {
   async search(query: QueryParamDto) {
     const paginate = createPaginator({
       page: query.page,
-      perPage: query.pageSize,
+      perPage: query.perPage,
     });
     const orderField = query.sortBy || 'id';
     const orderType = query.sortType || 'desc';

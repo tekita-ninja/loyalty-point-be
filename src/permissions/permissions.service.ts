@@ -17,7 +17,7 @@ export class PermissionsService {
   async findMany(query: QueryParamDto) {
     const paginate = createPaginator({
       page: query.page,
-      perPage: query.pageSize,
+      perPage: query.perPage,
     });
     const orderField = query.sortBy || 'path';
     const orderType = query.sortType || 'desc';

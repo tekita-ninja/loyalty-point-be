@@ -22,10 +22,9 @@ export class FileService {
       targetFolder,
       fileName,
     );
-    await fs.mkdirSync(
-      join(process.cwd(), 'uploads', '_temp', targetFolder),
-      { recursive: true },
-    );
+    await fs.mkdirSync(join(process.cwd(), 'uploads', '_temp', targetFolder), {
+      recursive: true,
+    });
     await fs.renameSync(file.path, newPath);
 
     const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
@@ -56,17 +55,20 @@ export class FileService {
       namaFolder,
       filename,
     );
-    const finalFolder = join(
-      process.cwd(),
-      'uploads',
-      namaFolder,
-    );
+
+    if (!(await fs.pathExists(tempPath))) {
+      throw new BadRequestException(
+        'File tidak ada di folder temp maupun di folder final!',
+      );
+    }
+
+    const finalFolder = join(process.cwd(), 'uploads', namaFolder);
     const finalPath = join(finalFolder, filename);
 
     await fs.ensureDir(finalFolder);
     await fs.copy(tempPath, finalPath, { overwrite: true });
 
-    const publicUrl = `uploads/${namaFolder}/${filename}`;
+    const publicUrl = `/uploads/${namaFolder}/${filename}`;
 
     return publicUrl;
   }
@@ -87,15 +89,25 @@ export class FileService {
         const namaFolder = parts[3];
         const filename = parts[4];
 
-        relativePath = `/uploads/${namaFolder}/${filename}`;
+        relativePath = `uploads/${namaFolder}/${filename}`;
       }
 
       const filePath = join(process.cwd(), relativePath);
-      await fs.pathExists(filePath);
-
-      return false;
+      return await fs.pathExists(filePath);
     } catch (error) {
       return false;
     }
+  }
+
+  async getPathName(url: string) {
+    const parsedUrl = new URL(url);
+    let path = parsedUrl.pathname;
+
+    if (path.startsWith('/uploads/_temp/')) {
+      const parts = path.split('/');
+      path = `/uploads/${parts[3]}/${parts[4]}`;
+    }
+
+    return path;
   }
 }

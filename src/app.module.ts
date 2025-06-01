@@ -11,10 +11,12 @@ import { UsersModule } from './users/users.module';
 import { CategoryModule } from './category/category.module';
 import { LocationModule } from './location/location.module';
 import { RewardModule } from './reward/reward.module';
-import { FileModule } from './common/files/files.module';
 import { CommonModule } from './common/common.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ScheduleTasksModule } from './common/schedule/schedule.module';
+import { BenefitModule } from './benefit/benefit.module';
+import { RankingModule } from './ranking/ranking.module';
+import { PromotionModule } from './promotion/promotion.module';
 
 @Module({
   imports: [
@@ -34,7 +36,10 @@ import { ScheduleTasksModule } from './common/schedule/schedule.module';
     RewardModule,
     CommonModule,
     ScheduleModule.forRoot(),
-    ScheduleTasksModule
+    ScheduleTasksModule,
+    BenefitModule,
+    RankingModule,
+    PromotionModule,
   ],
   controllers: [],
   providers: [],

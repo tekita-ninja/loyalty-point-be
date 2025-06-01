@@ -10,12 +10,13 @@ import { Location, Prisma, Reward } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { RewardService } from 'src/reward/reward.service';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class LocationService {
   constructor(
     private prismaService: PrismaService,
-    private rewardService: RewardService
+    private rewardService: RewardService,
   ) {}
 
   async findAll() {
@@ -44,7 +45,7 @@ export class LocationService {
   }
 
   async findOne(id: string) {
-    await checkDataById<Location>(id, this.prismaService.location);
+    await checkDataById<Location>(id, this.prismaService.location, 'location');
     return await this.prismaService.location.findUnique({
       where: { id },
       select: {
@@ -76,7 +77,7 @@ export class LocationService {
   }
 
   async update(id: string, data: UpdateLocationDto) {
-    await checkDataById<Location>(id, this.prismaService.location);
+    await checkDataById<Location>(id, this.prismaService.location, 'location');
     return await this.prismaService.location.update({
       where: { id },
       data,
@@ -91,7 +92,7 @@ export class LocationService {
   }
 
   async delete(id: string) {
-    await checkDataById<Location>(id, this.prismaService.location);
+    await checkDataById<Location>(id, this.prismaService.location, 'location');
     return await this.prismaService.location.delete({
       where: { id },
       select: {
@@ -195,7 +196,7 @@ export class LocationService {
       });
     }
 
-    const rewards =  await paginate<Reward, Prisma.RewardFindManyArgs>(
+    const rewards = await paginate<Reward, Prisma.RewardFindManyArgs>(
       this.prismaService.reward,
       {
         where: { AND: filter },
@@ -215,7 +216,6 @@ export class LocationService {
       },
     );
 
-    return this.rewardService.toRewardsResponse(rewards)
-
+    return transformUrlPicture(rewards);
   }
 }

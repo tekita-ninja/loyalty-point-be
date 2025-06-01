@@ -8,9 +8,9 @@ import * as path from 'path';
 export class TempCleanupService {
   private readonly logger = new Logger(TempCleanupService.name);
 
-  @Cron('22 2 * * *') // setiap jam 12 malam (00:00)
+  @Cron('0 0 * * *') // setiap jam 12 malam (00:00)
   handleCron() {
-    const folderPath = path.join(process.cwd(),'uploads', '_temp');
+    const folderPath = path.join(process.cwd(), 'uploads', '_temp');
 
     if (fs.existsSync(folderPath)) {
       fs.readdir(folderPath, (err, files) => {

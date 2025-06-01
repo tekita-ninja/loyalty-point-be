@@ -168,8 +168,10 @@ model RoleMenu {
 model Ranking {
   id           String @id @default(uuid())
   name         String @db.VarChar(100)
+  urlPicture   String @db.VarChar(255)
+
   minPoints    Int
-  minSpendings Int
+  minSpendings Int?
 
   users        User[]  
   benefits     RankingBenefit[]
@@ -248,6 +250,7 @@ model Promotion {
   id                String @id @default(uuid())
   title     String @db.VarChar(100)
   subtitle  String @db.VarChar(100)
+  urlPicture String @db.VarChar(255)
   description String @db.Text
   startDate DateTime
   endDate   DateTime

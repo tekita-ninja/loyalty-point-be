@@ -6,6 +6,7 @@ import { Category, Prisma, Reward } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { FileService } from 'src/common/files/files.service';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class RewardService {
@@ -30,7 +31,7 @@ export class RewardService {
       },
     });
 
-    return this.toRewardsResponse(rewards)
+    return transformUrlPicture(rewards);
   }
 
   async create(data: CreateRewardDto) {
@@ -44,6 +45,8 @@ export class RewardService {
       data.urlPicture = await this.fileService.copyFileFromTemp(
         data.urlPicture,
       );
+    } else {
+      data.urlPicture = await this.fileService.getPathName(data.urlPicture);
     }
 
     const reward = await this.prismaService.reward.create({
@@ -71,7 +74,7 @@ export class RewardService {
       },
     });
 
-    return this.toRewardResponse(reward)
+    return transformUrlPicture(reward);
   }
 
   async findOne(id: string) {
@@ -106,7 +109,7 @@ export class RewardService {
       },
     });
 
-    return this.toRewardResponse(reward)
+    return transformUrlPicture(reward);
   }
 
   async update(id: string, data: UpdateRewardDto) {
@@ -122,6 +125,8 @@ export class RewardService {
       data.urlPicture = await this.fileService.copyFileFromTemp(
         data.urlPicture,
       );
+    } else {
+      data.urlPicture = await this.fileService.getPathName(data.urlPicture);
     }
 
     const reward = await this.prismaService.reward.update({
@@ -141,7 +146,7 @@ export class RewardService {
       },
     });
 
-    return this.toRewardResponse(reward)
+    return transformUrlPicture(reward);
   }
 
   async delete(id: string) {
@@ -151,7 +156,7 @@ export class RewardService {
       where: { id },
     });
 
-    return this.toRewardResponse(reward)
+    return transformUrlPicture(reward);
   }
 
   async search(query: QueryParamDto) {
@@ -213,40 +218,6 @@ export class RewardService {
       },
     );
 
-    return this.toRewardsResponse(rewards)
-
+    return transformUrlPicture(rewards);
   }
-
-  toRewardResponse(reward: any) {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    return {
-      ...reward,
-      urlPicture: `${baseUrl}/${reward.urlPicture}`, // full URL hasil gabungan
-    };
-  }
-
-  toRewardsResponse(rewards: any) {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    
-    if (Array.isArray(rewards)) {
-    return rewards.map(reward => ({
-        ...reward,
-        urlPicture: `${baseUrl}/${reward.urlPicture}`,
-      }));
-    }
-
-    // Jika rewards adalah objek dengan properti data (pagination result)
-    if (Array.isArray(rewards?.data)) {
-      const modifiedData = rewards.data.map(reward => ({
-        ...reward,
-        urlPicture: `${baseUrl}/${reward.urlPicture}`,
-      }));
-
-      return {
-        ...rewards,
-        data: modifiedData,
-      };
-    }
-  }
-
 }

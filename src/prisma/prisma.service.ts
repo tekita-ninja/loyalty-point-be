@@ -6,9 +6,7 @@ import { useMiddleware } from './middleware/prisma.middleware';
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy
-{ 
-  
-
+{
   async onModuleInit() {
     this.$use(useMiddleware());
     await this.$connect();

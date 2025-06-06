@@ -19,3 +19,13 @@ export class SetRoleMenuDto {
   @IsString({ each: true })
   menuIds: string[];
 }
+
+export class SetRolePermissionDto {
+  @IsNotEmpty()
+  @IsString()
+  roleId: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  permissionIds: string[];
+}

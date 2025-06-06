@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   UnauthorizedException,
@@ -96,10 +97,9 @@ export class AuthService {
     };
   }
   async signup(dto: SignUpDto) {
-    const isEmailRegistered = await this.isEmailUsed(dto.email);
-    if (isEmailRegistered) {
-      throw new BadRequestException('Email has been used!');
-    }
+    await this.isEmailUsed(dto.email);
+    await this.isPhoneUsed(dto.phone);
+
     dto.password = await hashPassword(dto.password);
     return this.prisma.user.create({
       data: dto,
@@ -107,6 +107,7 @@ export class AuthService {
   }
   async signout(req: Request) {
     const authorization = req.headers.authorization;
+    console.log(authorization)
     const token = authorization.split(' ').pop();
     const decodeToken = await this.decodeToken(token);
     await this.prisma.user.update({
@@ -127,12 +128,39 @@ export class AuthService {
     });
     return user;
   }
-  async isEmailUsed(email: string) {
-    const count = await this.prisma.user.count({
+  
+  async isEmailUsed(email: string, id?: string) {
+    const result = await this.prisma.user.findFirst({
       where: { email },
+      select: {
+        id: true,
+        email: true,
+      },
     });
-    return count;
+    
+    if (result && id != result.id) {
+        throw new ConflictException('email has been used');
+    }
+
+    return result;
   }
+
+  async isPhoneUsed(phone: string, id?: string) {
+    const result = await this.prisma.user.findFirst({
+      where: { phone },
+      select: {
+        id: true,
+        phone: true,
+      },
+    });
+    
+    if (result && id !== result.id) {
+      throw new ConflictException('phone has been used');
+    }
+
+    return result;
+  }
+
   async refreshToken(refreshToken: string) {
     if (!refreshToken) {
       throw new ForbiddenException('invalid refresh token');

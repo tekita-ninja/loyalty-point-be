@@ -11,7 +11,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { CreateRoleDto, SetRoleMenuDto } from './dto/create-role.dto';
+import { CreateRoleDto, SetRoleMenuDto, SetRolePermissionDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RolesService } from './roles.service';
 import { PaginationDto } from 'src/common/pagination/dto/pagination.dto';
@@ -50,10 +50,18 @@ export class RolesController {
   remove(@Param('id') id: string) {
     return this.rolesService.remove(id);
   }
+  
   // extra
   @Post('set-menu')
   @HttpCode(HttpStatus.OK)
   setRole(@Body() dto: SetRoleMenuDto) {
     return this.rolesService.setRole(dto);
   }
+
+  @Post('set-permission')
+  @HttpCode(HttpStatus.OK)
+  setPermissionRole(@Body() dto: SetRolePermissionDto ){
+    return this.rolesService.replaceRolePermission(dto)
+  }
+
 }

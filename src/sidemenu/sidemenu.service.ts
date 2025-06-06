@@ -40,7 +40,7 @@ export class SidemenuService {
     }
 
     const uniqueMenus = Array.from(uniqueMenusMap.values());
-
+    console.log(uniqueMenus)
     // Bangun struktur pohon
     const buildTree = (
       menus: Menu[],

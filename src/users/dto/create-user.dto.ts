@@ -1,6 +1,8 @@
 import { Gender } from '@prisma/client';
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsDate,
   IsEmail,
   IsNotEmpty,
   IsString,
@@ -39,6 +41,8 @@ export class CreateUserDto {
   gender: Gender;
 
   @IsNotEmpty()
+  @IsDate()
+  @Type(() => Date)
   birthDate: Date;
 
   @IsNotEmpty()
@@ -62,9 +66,6 @@ export class CreateUserByAdminDto {
   @IsEmail()
   email: string;
 
-  @IsStrongPassword({ minLength: 6 })
-  password: string;
-
   @IsNotEmpty()
   @IsString()
   phone: string;
@@ -74,5 +75,7 @@ export class CreateUserByAdminDto {
   gender: Gender;
 
   @IsNotEmpty()
+  @IsDate()
+  @Type(() => Date)
   birthDate: Date;
 }

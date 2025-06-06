@@ -18,6 +18,7 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { HttpAdapterHost } from '@nestjs/core';
 import { PermissionGuard } from 'src/auth/auth.guard';
+import { CurrentUserId } from 'src/common/decorators/current-user.decorator';
 @UseGuards(AuthGuard('jwt'), PermissionGuard)
 @Controller('api/permissions')
 export class PermissionsController {
@@ -58,28 +59,12 @@ export class PermissionsController {
   @Post('sync')
   @HttpCode(HttpStatus.OK)
   async syncPermissions() {
-    const { httpAdapter } = this.adapterHost;
-    const router = httpAdapter.getInstance()?._router;
-
-    if (!router) return 'Router not found';
-    const stack = router.stack;
-    const routes = stack
-      .filter((layer) => layer.route)
-      .flatMap((layer) => {
-        const path = layer.route.path;
-        const methods = Object.keys(layer.route.methods).filter(
-          (method) => layer.route.methods[method],
-        );
-        return methods.map((method) => {
-          const onlyPath = path.replace(/^\/v1\//, '');
-          return {
-            method: method.toUpperCase(),
-            path: onlyPath,
-            code: `${method.toUpperCase()}_${onlyPath}`,
-            name: `${method.toUpperCase()}_${onlyPath}`,
-          };
-        });
-      });
-    return this.permissionsService.syncPermissions(routes);
+    return this.permissionsService.syncPermissions();
   }
+
+  @Post('set-role')
+  async setRole(@Body() body: { permissionId: string, roleIds: string[]}) {
+    return await this.permissionsService.setRole(body)
+  }
+
 }

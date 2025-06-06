@@ -1,19 +1,8 @@
-import { Gender } from '@prisma/client';
-import { Type } from 'class-transformer';
-import { IsDate, IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { IsStrongPassword } from 'src/common/validators/IsStrongPassword';
-export class JwtPayload {
-  userId: string;
-}
-export class SignInDto {
-  @IsNotEmpty()
-  email: string;
+import { Gender } from "@prisma/client";
+import { Type } from "class-transformer";
+import { IsDate, IsEmail, IsNotEmpty, IsString, IsStrongPassword, MaxLength } from "class-validator";
 
-  @IsNotEmpty()
-  password: string;
-}
-
-export class SignUpDto {
+export class CustomerRegisterDto {
   @IsNotEmpty()
   @IsString()
   @MaxLength(100)
@@ -45,4 +34,13 @@ export class SignUpDto {
   @IsDate()
   @Type(() => Date)
   birthDate: Date;
+}
+
+export class CustomerLoginDto {
+    @IsString()
+    phone: string
+
+    @IsString()
+    password: string
+
 }

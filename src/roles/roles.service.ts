@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Role } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRoleDto, SetRoleMenuDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { checkDataById } from 'src/common/utils/checkDataById';
 
 @Injectable()
 export class RolesService {
@@ -129,6 +130,7 @@ export class RolesService {
     }
     return r;
   }
+
   async setRole(dto: SetRoleMenuDto) {
     const role = await this.prisma.role.findUnique({
       where: { id: dto.roleId },
@@ -157,4 +159,30 @@ export class RolesService {
       return created;
     });
   }
+
+  async replaceRolePermission(body: { roleId: string; permissionIds: string[] }) {
+    
+    await checkDataById(body.roleId, this.prisma.role)
+
+    const data =  body.permissionIds.map(item => ({
+      roleId: body.roleId,
+      permissionId: item
+    }))
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.rolePermission.deleteMany({
+        where: {
+          roleId: body.roleId,
+        },
+      });
+
+      const created = await tx.rolePermission.createMany({
+        data,
+        skipDuplicates: true,
+      });
+
+      return created;
+    });
+  }
+
 }

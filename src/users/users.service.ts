@@ -17,6 +17,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
   async create(createUserDto: CreateUserByAdminDto) {
+    await this.isEmailUsed(createUserDto.email);
+    await this.isPhoneUsed(createUserDto.phone);
     return this.prisma.user.create({
       data: {
         ...createUserDto,
@@ -51,6 +53,7 @@ export class UsersService {
           id: true,
           firstname: true,
           lastname: true,
+          phone: true,
           email: true,
           status: true,
           roles: {
@@ -104,15 +107,15 @@ export class UsersService {
       data: {
         firstname: body.firstname,
         lastname: body.lastname,
+        gender: body.gender,
         status: body.status,
+        birthDate: body.birthDate
       },
-      select: {
-        id: true,
-      },
+      
     });
   }
 
-  async isEmailUsed(email: string, id: string) {
+  async isEmailUsed(email: string, id?: string) {
     const result = await this.prisma.user.findFirst({
       where: { email },
       select: {
@@ -120,9 +123,27 @@ export class UsersService {
         email: true,
       },
     });
-    if (result && result.id !== id) {
-      throw new ConflictException('email has been used');
+    
+    if (result && id != result.id) {
+        throw new ConflictException('email has been used');
     }
+
+    return result;
+  }
+
+  async isPhoneUsed(phone: string, id?: string) {
+    const result = await this.prisma.user.findFirst({
+      where: { phone },
+      select: {
+        id: true,
+        phone: true,
+      },
+    });
+    
+    if (result && id !== result.id) {
+      throw new ConflictException('phone has been used');
+    }
+
     return result;
   }
 
@@ -172,6 +193,7 @@ export class UsersService {
       },
     });
   }
+  
   async replaceUserRole(body: { userId: string; roleIds: string[] }) {
     const user = await this.prisma.user.findUnique({
       where: { id: body.userId },

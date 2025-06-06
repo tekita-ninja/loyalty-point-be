@@ -18,6 +18,22 @@ enum Gender {
   FEMALE
 }
 
+model OtpCode {
+  id           String  @id @default(uuid())
+  phone        String
+  code         String
+  expiresAt    DateTime
+  isVerified   Boolean
+}
+
+model TempUser {
+  id              String  @id @default(uuid())
+  phone           String  @unique()
+  isPhoneVerified Boolean
+  registerToken   String
+  expiresAt       DateTime   
+}
+
 model User {
   id           String  @id @default(uuid())
   firstname    String  @db.VarChar(100)

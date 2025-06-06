@@ -195,6 +195,7 @@ async function main() {
       menuId: i,
     };
   });
+  
   const roleMenus = await createRoleMenu(roleMenuIds);
   await createMenuMenuManagement(role.id, headerMenu.id);
   console.log({

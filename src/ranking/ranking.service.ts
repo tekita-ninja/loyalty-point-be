@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateRankingDto, UpdateRankingDto } from './dto/ranking.dto';
-import { checkDataById } from 'src/common/utils/checkDataById';
-import { Prisma, Promotion, Ranking } from '@prisma/client';
+import { CreateRankingDto, ReplaceRankingBenefitsDto, ReplaceRankingPromotionsDto, UpdateRankingDto } from './dto/ranking.dto';
+import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
+import { Benefit, Prisma, Promotion, Ranking } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { FileService } from 'src/common/files/files.service';
@@ -203,4 +203,66 @@ export class RankingService {
 
     return transformUrlPicture(promotions);
   }
+
+  async replaceRankingBenefits(data: ReplaceRankingBenefitsDto) {
+    await checkDataById<Ranking>(data.rankingId, this.prismaService.ranking)
+
+    await checkDataByIds<Benefit>(data.benefitIds, this.prismaService.benefit)
+
+    const pivotData = data.benefitIds.map(item => ({
+      rankingId: data.rankingId,
+      benefitId: item
+    }))
+
+    return await this.prismaService.$transaction(async tx => {
+      await tx.rankingBenefit.deleteMany({
+        where: { rankingId: data.rankingId }
+      });
+
+      let result = { count: 0 };
+      
+      if (pivotData.length > 0) {
+        result = await tx.rankingBenefit.createMany({
+          data: pivotData,
+          skipDuplicates: true,
+        });
+      }
+
+      return result;
+    })
+
+  }
+
+  async replaceRankingPromotion(data: ReplaceRankingPromotionsDto) {
+    await checkDataById<Ranking>(data.rankingId, this.prismaService.ranking)
+
+    await checkDataByIds<Promotion>(data.promotionIds, this.prismaService.promotion)
+
+    const pivotData = data.promotionIds.map(item => ({
+      rankingId: data.rankingId,
+      promotionId: item
+    }))
+
+
+    return await this.prismaService.$transaction(async tx => {
+      await tx.promotionRanking.deleteMany({
+        where: { rankingId: data.rankingId }
+      })
+
+      let result = { count: 0 }
+
+      if(pivotData.length > 0) {
+        result = await tx.promotionRanking.createMany({
+          data: pivotData,
+          skipDuplicates: true
+        })
+      }
+
+      return result;
+
+    })
+
+
+  }
+
 }

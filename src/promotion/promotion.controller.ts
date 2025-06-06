@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { PromotionService } from './promotion.service';
-import { CreatePromotionDto, UpdatePromotionDto } from './dto/promotion.dto';
+import { CreatePromotionDto, ReplacePromotionRankingsDto, UpdatePromotionDto } from './dto/promotion.dto';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 
 @Controller('api/promotion')
@@ -45,4 +45,12 @@ export class PromotionController {
   async search(@Query() query: QueryParamDto) {
     return await this.promotionService.search(query);
   }
+
+  @Post('assign-ranking')
+  async replacePromotionRankings(
+    @Body() body: ReplacePromotionRankingsDto
+  ) {
+    return await this.promotionService.replacePromotionRankings(body);
+  }
+
 }

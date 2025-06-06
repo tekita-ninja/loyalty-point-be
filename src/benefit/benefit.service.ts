@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateBenefitDto, UpdateBenefitDto } from './dto/benefit.dto';
-import { Benefit, Prisma } from '@prisma/client';
-import { checkDataById } from 'src/common/utils/checkDataById';
+import { CreateBenefitDto, ReplaceBenefitRankingsDto, UpdateBenefitDto } from './dto/benefit.dto';
+import { Benefit, Prisma, Ranking } from '@prisma/client';
+import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 
@@ -107,4 +107,33 @@ export class BenefitService {
       },
     );
   }
+
+  async replaceBenefitRankings(data: ReplaceBenefitRankingsDto) {
+    await checkDataById<Benefit>(data.benefitId, this.prismaService.benefit)
+
+    await checkDataByIds<Ranking>(data.rankingIds, this.prismaService.ranking)
+
+    const pivotData = data.rankingIds.map(item => ({
+      benefitId: data.benefitId,  
+      rankingId: item
+    }))
+
+    return await this.prismaService.$transaction(async tx => {
+      await tx.rankingBenefit.deleteMany({
+        where: { rankingId: data.benefitId }
+      })
+
+      let result = { count: 0 }
+      if(pivotData.length > 0) {
+        result = await tx.rankingBenefit.createMany({
+          data: pivotData,
+          skipDuplicates: true
+        })
+      }
+
+      return result;
+    })
+
+  }
+
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePromotionDto, UpdatePromotionDto } from './dto/promotion.dto';
-import { checkDataById } from 'src/common/utils/checkDataById';
-import { Prisma, Promotion } from '@prisma/client';
+import { CreatePromotionDto, ReplacePromotionRankingsDto, UpdatePromotionDto } from './dto/promotion.dto';
+import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
+import { Prisma, Promotion, Ranking } from '@prisma/client';
 import { FileService } from 'src/common/files/files.service';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
@@ -210,4 +210,33 @@ export class PromotionService {
 
     return transformUrlPicture(promotions);
   }
+
+  async replacePromotionRankings(data: ReplacePromotionRankingsDto) {
+    await checkDataById<Promotion>(data.promotionId, this.prismaService.promotion)
+
+    await checkDataByIds<Ranking>(data.rankingIds, this.prismaService.ranking)
+
+    const pivotData = data.rankingIds.map(item => ({
+      promotionId: data.promotionId,
+      rankingId: item
+    }))
+
+    return await this.prismaService.$transaction(async tx => {
+      await tx.promotionRanking.deleteMany({
+        where: {promotionId: data.promotionId}
+      })
+
+      let result = { count: 0 }
+
+      if(pivotData.length > 0) {
+        result = await tx.promotionRanking.createMany({
+          data: pivotData,
+          skipDuplicates: true
+        })
+      }     
+      
+      return result;
+    })
+  }  
+
 }

@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ArrayUnique, IsArray, IsDate, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePromotionDto {
   @IsString()
@@ -26,6 +26,15 @@ export class CreatePromotionDto {
   @IsOptional()
   @IsNumber()
   isPush: number;
+}
+
+export class ReplacePromotionRankingsDto {
+  @IsString()
+  promotionId: string
+
+  @IsArray()
+  @ArrayUnique()
+  rankingIds: string[]
 }
 
 export class UpdatePromotionDto extends PartialType(CreatePromotionDto) {}

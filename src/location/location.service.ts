@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
-  AssignRewardDto,
   CreateLocationDto,
+  ReplaceLocationRewardsDto,
   UpdateLocationDto,
 } from './dto/location.dto';
 import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
@@ -134,7 +134,7 @@ export class LocationService {
     );
   }
 
-  async assignRewards(data: AssignRewardDto) {
+  async replaceLocationRewards(data: ReplaceLocationRewardsDto) {
     await checkDataByIds<Reward>(
       data.rewardIds,
       this.prismaService.reward,
@@ -152,10 +152,23 @@ export class LocationService {
       locationId: data.locationId,
     }));
 
-    return await this.prismaService.rewardLocation.createMany({
-      data: pivotData,
-      skipDuplicates: true,
-    });
+    return await this.prismaService.$transaction(async tx => {
+      await tx.rewardLocation.deleteMany({
+        where: {locationId: data.locationId}
+      });
+
+      let result = { count: 0 }
+
+      if(pivotData.length > 0){
+        result = await tx.rewardLocation.createMany({
+          data: pivotData,
+          skipDuplicates: true
+        })
+      }
+      
+      return result
+
+    })
   }
 
   async findManyRewards(locationId: string, query: QueryParamDto) {

@@ -10,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { LocationService } from './location.service';
 import {
-  AssignRewardDto,
   CreateLocationDto,
+  ReplaceLocationRewardsDto,
   UpdateLocationDto,
 } from './dto/location.dto';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
@@ -51,8 +51,8 @@ export class LocationController {
   }
 
   @Post('assign-reward')
-  async assignReward(@Body() body: AssignRewardDto) {
-    return await this.locationService.assignRewards(body);
+  async assignReward(@Body() body: ReplaceLocationRewardsDto) {
+    return await this.locationService.replaceLocationRewards(body);
   }
 
   @Get('/:locationId/reward')

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { checkDataById } from 'src/common/utils/checkDataById';
-import { CreateRewardDto, UpdateRewardDto } from './dto/reward.dto';
+import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
+import { CreateRewardDto, ReplaceRewardLocationsDto, UpdateRewardDto } from './dto/reward.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Prisma, Reward } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
@@ -220,4 +220,35 @@ export class RewardService {
 
     return transformUrlPicture(rewards);
   }
+
+  async replaceRewardLocations(data: ReplaceRewardLocationsDto) {
+    await checkDataById(data.rewardId, this.prismaService.reward)
+    
+    await checkDataByIds(data.locationIds, this.prismaService.location)
+
+    const pivotData = data.locationIds.map(item => ({
+      rewardId: data.rewardId,
+      locationId: item
+    }))
+
+    return await this.prismaService.$transaction(async tx => {
+      await tx.rewardLocation.deleteMany({
+        where: { rewardId : data.rewardId }
+      })
+
+      if(pivotData.length > 0){
+        return await tx.rewardLocation.createMany({
+          data: pivotData,
+          skipDuplicates: true
+        })
+      }
+
+      return {
+        count: 0
+      }      
+
+    })
+
+  }
+
 }

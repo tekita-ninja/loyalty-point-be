@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, Role } from '@prisma/client';
+import { Permission, Prisma, Role } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRoleDto, SetRoleMenuDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { checkDataById } from 'src/common/utils/checkDataById';
+import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
 
 @Injectable()
 export class RolesService {
@@ -162,12 +162,14 @@ export class RolesService {
 
   async replaceRolePermission(body: { roleId: string; permissionIds: string[] }) {
     
-    await checkDataById(body.roleId, this.prisma.role)
+    await checkDataById<Role>(body.roleId, this.prisma.role)
+
+    await checkDataByIds<Permission>(body.permissionIds, this.prisma.permission)
 
     const data =  body.permissionIds.map(item => ({
       roleId: body.roleId,
       permissionId: item
-    }))
+    }));
 
     return this.prisma.$transaction(async (tx) => {
       await tx.rolePermission.deleteMany({
@@ -176,12 +178,18 @@ export class RolesService {
         },
       });
 
-      const created = await tx.rolePermission.createMany({
-        data,
-        skipDuplicates: true,
-      });
+      let result = { count: 0 }
 
-      return created;
+      if(data.length > 0) {
+        
+        result = await tx.rolePermission.createMany({
+          data,
+          skipDuplicates: true,
+        });
+
+      }
+      
+      return result;
     });
   }
 

@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { BenefitService } from './benefit.service';
-import { CreateBenefitDto, UpdateBenefitDto } from './dto/benefit.dto';
+import { CreateBenefitDto, ReplaceBenefitRankingsDto, UpdateBenefitDto } from './dto/benefit.dto';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 
 @Controller('api/benefit')
@@ -45,4 +45,12 @@ export class BenefitController {
   async search(@Query() query: QueryParamDto) {
     return await this.benefitService.search(query);
   }
+
+  @Post('assign-ranking')
+  async replaceRanking(
+    @Body() body: ReplaceBenefitRankingsDto
+  ) {
+    return await this.benefitService.replaceBenefitRankings(body)
+  }
+
 }

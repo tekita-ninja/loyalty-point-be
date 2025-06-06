@@ -21,15 +21,15 @@ export class CreateLocationDto {
   longitude: number;
 }
 
-export class AssignRewardDto {
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayUnique()
-  @IsString({ each: true })
-  rewardIds: string[];
-
+export class ReplaceLocationRewardsDto {
   @IsString()
   locationId: string;
+
+  @IsArray()
+  @ArrayUnique()
+  rewardIds: string[];
+
+
 }
 
 export class UpdateLocationDto extends PartialType(CreateLocationDto) {}

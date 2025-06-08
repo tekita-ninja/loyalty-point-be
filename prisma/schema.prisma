@@ -29,9 +29,8 @@ model OtpCode {
 model TempUser {
   id              String  @id @default(uuid())
   phone           String  @unique()
-  isPhoneVerified Boolean
-  registerToken   String
-  expiresAt       DateTime   
+  registerToken   String?
+  expiresAt       DateTime?   
 }
 
 model User {
@@ -184,7 +183,7 @@ model RoleMenu {
 model Ranking {
   id           String @id @default(uuid())
   name         String @db.VarChar(100)
-  urlPicture   String @db.VarChar(255)
+  urlPicture   String? @db.VarChar(255)
 
   minPoints    Int
   minSpendings Int?

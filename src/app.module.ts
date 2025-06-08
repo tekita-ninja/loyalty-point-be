@@ -17,6 +17,7 @@ import { CommonModule } from './common/common.module';
 import { BenefitModule } from './benefit/benefit.module';
 import { RankingModule } from './ranking/ranking.module';
 import { PromotionModule } from './promotion/promotion.module';
+import { AuthCustomerModule } from './auth/customer/auth.customer.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PromotionModule } from './promotion/promotion.module';
     BenefitModule,
     RankingModule,
     PromotionModule,
+    AuthCustomerModule
   ],
   controllers: [],
   providers: [],

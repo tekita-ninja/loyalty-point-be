@@ -1,4 +1,8 @@
-import { BadRequestException, createParamDecorator, ExecutionContext } from '@nestjs/common';
+import {
+  BadRequestException,
+  createParamDecorator,
+  ExecutionContext,
+} from '@nestjs/common';
 
 export const GetToken = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext) => {
@@ -6,7 +10,7 @@ export const GetToken = createParamDecorator(
     const authHeader = request.headers['authorization'];
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new BadRequestException("Token not in Bearer format!"); // atau throw error jika wajib
+      throw new BadRequestException('Token not in Bearer format!'); // atau throw error jika wajib
     }
 
     return authHeader.split(' ')[1]; // hasil: hanya token-nya

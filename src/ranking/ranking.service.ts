@@ -1,6 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateRankingDto, ReplaceRankingBenefitsDto, ReplaceRankingPromotionsDto, UpdateRankingDto } from './dto/ranking.dto';
+import {
+  CreateRankingDto,
+  ReplaceRankingBenefitsDto,
+  ReplaceRankingPromotionsDto,
+  UpdateRankingDto,
+} from './dto/ranking.dto';
 import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
 import { Benefit, Prisma, Promotion, Ranking } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
@@ -205,22 +210,22 @@ export class RankingService {
   }
 
   async replaceRankingBenefits(data: ReplaceRankingBenefitsDto) {
-    await checkDataById<Ranking>(data.rankingId, this.prismaService.ranking)
+    await checkDataById<Ranking>(data.rankingId, this.prismaService.ranking);
 
-    await checkDataByIds<Benefit>(data.benefitIds, this.prismaService.benefit)
+    await checkDataByIds<Benefit>(data.benefitIds, this.prismaService.benefit);
 
-    const pivotData = data.benefitIds.map(item => ({
+    const pivotData = data.benefitIds.map((item) => ({
       rankingId: data.rankingId,
-      benefitId: item
-    }))
+      benefitId: item,
+    }));
 
-    return await this.prismaService.$transaction(async tx => {
+    return await this.prismaService.$transaction(async (tx) => {
       await tx.rankingBenefit.deleteMany({
-        where: { rankingId: data.rankingId }
+        where: { rankingId: data.rankingId },
       });
 
       let result = { count: 0 };
-      
+
       if (pivotData.length > 0) {
         result = await tx.rankingBenefit.createMany({
           data: pivotData,
@@ -229,40 +234,37 @@ export class RankingService {
       }
 
       return result;
-    })
-
+    });
   }
 
   async replaceRankingPromotion(data: ReplaceRankingPromotionsDto) {
-    await checkDataById<Ranking>(data.rankingId, this.prismaService.ranking)
+    await checkDataById<Ranking>(data.rankingId, this.prismaService.ranking);
 
-    await checkDataByIds<Promotion>(data.promotionIds, this.prismaService.promotion)
+    await checkDataByIds<Promotion>(
+      data.promotionIds,
+      this.prismaService.promotion,
+    );
 
-    const pivotData = data.promotionIds.map(item => ({
+    const pivotData = data.promotionIds.map((item) => ({
       rankingId: data.rankingId,
-      promotionId: item
-    }))
+      promotionId: item,
+    }));
 
-
-    return await this.prismaService.$transaction(async tx => {
+    return await this.prismaService.$transaction(async (tx) => {
       await tx.promotionRanking.deleteMany({
-        where: { rankingId: data.rankingId }
-      })
+        where: { rankingId: data.rankingId },
+      });
 
-      let result = { count: 0 }
+      let result = { count: 0 };
 
-      if(pivotData.length > 0) {
+      if (pivotData.length > 0) {
         result = await tx.promotionRanking.createMany({
           data: pivotData,
-          skipDuplicates: true
-        })
+          skipDuplicates: true,
+        });
       }
 
       return result;
-
-    })
-
-
+    });
   }
-
 }

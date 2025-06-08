@@ -1,20 +1,17 @@
-import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { Permission, Prisma } from '@prisma/client';
-import { DiscoveryService, HttpAdapterHost, MetadataScanner, Reflector } from '@nestjs/core';
-import { Express } from 'express';
+import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { PATH_METADATA, METHOD_METADATA } from '@nestjs/common/constants';
 import { methodMap } from './enum/request.enum';
 import { checkDataById } from 'src/common/utils/checkDataById';
-import { RolePermission } from 'src/role_permissions/entities/role_permission.entity';
 
 @Injectable()
-export class PermissionsService  {
-
+export class PermissionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly discoveryService: DiscoveryService,
@@ -31,42 +28,51 @@ export class PermissionsService  {
   getAllRoutes() {
     const controllers = this.discoveryService.getControllers();
     const routes = [];
-  
+
     for (const wrapper of controllers) {
       const { instance } = wrapper;
       if (!instance) continue;
-  
-      const controllerPath = this.reflector.get(PATH_METADATA, instance.constructor) || '';
-  
-      this.metadataScanner.scanFromPrototype(instance, Object.getPrototypeOf(instance), (methodName) => {
-        const methodRef = instance[methodName];
-        if (!methodRef) return;
-  
-        const methodPath = this.reflector.get(PATH_METADATA, methodRef) || '';
-        const requestMethod = this.reflector.get(METHOD_METADATA, methodRef);
-  
-        if (requestMethod !== undefined) {
-          const methodString = methodMap[requestMethod] || 'UNKNOWN';
-  
-          const fullPath = `/${controllerPath}/${methodPath}`.replace(/\/+/g, '/').replace(/\/$/, '');
 
-          const cleanedPath = fullPath.replace(/^\/api/, '');
-  
-          const codeName = `${methodString}_${cleanedPath}`.replace(/_\/(.+)/, '_$1');
-  
-          routes.push({
-            method: methodString,
-            path: fullPath,
-            code: codeName,
-            name: codeName,
-          });
-        }
-      });
+      const controllerPath =
+        this.reflector.get(PATH_METADATA, instance.constructor) || '';
+
+      this.metadataScanner.scanFromPrototype(
+        instance,
+        Object.getPrototypeOf(instance),
+        (methodName) => {
+          const methodRef = instance[methodName];
+          if (!methodRef) return;
+
+          const methodPath = this.reflector.get(PATH_METADATA, methodRef) || '';
+          const requestMethod = this.reflector.get(METHOD_METADATA, methodRef);
+
+          if (requestMethod !== undefined) {
+            const methodString = methodMap[requestMethod] || 'UNKNOWN';
+
+            const fullPath = `/${controllerPath}/${methodPath}`
+              .replace(/\/+/g, '/')
+              .replace(/\/$/, '');
+
+            const cleanedPath = fullPath.replace(/^\/api/, '');
+
+            const codeName = `${methodString}_${cleanedPath}`.replace(
+              /_\/(.+)/,
+              '_$1',
+            );
+
+            routes.push({
+              method: methodString,
+              path: fullPath,
+              code: codeName,
+              name: codeName,
+            });
+          }
+        },
+      );
     }
-  
+
     return routes;
   }
-  
 
   async findMany(query: QueryParamDto) {
     const paginate = createPaginator({
@@ -155,12 +161,11 @@ export class PermissionsService  {
     return r;
   }
   async syncPermissions() {
-    const routes = this.getAllRoutes()
-    console.log(routes)
-    if(!routes)
-      throw new Error("no routes");
+    const routes = this.getAllRoutes();
+    console.log(routes);
+    if (!routes) throw new Error('no routes');
     for (const route of routes) {
-     const permission = await this.prisma.permission.upsert({
+      await this.prisma.permission.upsert({
         where: { code: route.code },
         update: {},
         create: route,
@@ -169,60 +174,52 @@ export class PermissionsService  {
 
     const role = await this.prisma.role.findFirst({
       where: {
-        code: "SUPER"
-      }
-    })
+        code: 'SUPER',
+      },
+    });
     const permissions = await this.prisma.permission.findMany();
 
-    const rolePermissions = permissions.map(permission => {
+    const rolePermissions = permissions.map((permission) => {
       return {
-          roleId: role.id,
-          permissionId: permission.id
-      }
-    })
+        roleId: role.id,
+        permissionId: permission.id,
+      };
+    });
 
-    for (const rolePermission  of rolePermissions) {
+    for (const rolePermission of rolePermissions) {
       await this.prisma.rolePermission.upsert({
-         where: { 
-            roleId_permissionId: {
-              roleId: rolePermission.roleId,
-              permissionId: rolePermission.permissionId,
-            }
+        where: {
+          roleId_permissionId: {
+            roleId: rolePermission.roleId,
+            permissionId: rolePermission.permissionId,
           },
-         update: {},
-         create: rolePermission,
-       });
-     }
+        },
+        update: {},
+        create: rolePermission,
+      });
+    }
 
     return { message: 'success', count: routes.length };
   }
 
-  async setRole(body: { permissionId: string, roleIds: string[] }){
+  async setRole(body: { permissionId: string; roleIds: string[] }) {
     await checkDataById<Permission>(body.permissionId, this.prisma.permission);
 
-    const data = body.roleIds.map(item => ({
+    const data = body.roleIds.map((item) => ({
       permissionId: body.permissionId,
       roleId: item,
-    }))
+    }));
 
-    return await this.prisma.$transaction(async tx => {
-
+    return await this.prisma.$transaction(async (tx) => {
       await tx.rolePermission.deleteMany({
-        where: { permissionId: body.permissionId }
-      })
-     const created = await tx.rolePermission.createMany({
+        where: { permissionId: body.permissionId },
+      });
+      const created = await tx.rolePermission.createMany({
         data,
-        skipDuplicates: true
-      })
-    
+        skipDuplicates: true,
+      });
+
       return created;
-
-    })
-
-    
-
+    });
   }
-
-
-
 }

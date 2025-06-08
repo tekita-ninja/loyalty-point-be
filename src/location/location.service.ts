@@ -152,23 +152,22 @@ export class LocationService {
       locationId: data.locationId,
     }));
 
-    return await this.prismaService.$transaction(async tx => {
+    return await this.prismaService.$transaction(async (tx) => {
       await tx.rewardLocation.deleteMany({
-        where: {locationId: data.locationId}
+        where: { locationId: data.locationId },
       });
 
-      let result = { count: 0 }
+      let result = { count: 0 };
 
-      if(pivotData.length > 0){
+      if (pivotData.length > 0) {
         result = await tx.rewardLocation.createMany({
           data: pivotData,
-          skipDuplicates: true
-        })
+          skipDuplicates: true,
+        });
       }
-      
-      return result
 
-    })
+      return result;
+    });
   }
 
   async findManyRewards(locationId: string, query: QueryParamDto) {

@@ -9,7 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { RewardService } from './reward.service';
-import { CreateRewardDto, ReplaceRewardLocationsDto, UpdateRewardDto } from './dto/reward.dto';
+import {
+  CreateRewardDto,
+  ReplaceRewardLocationsDto,
+  UpdateRewardDto,
+} from './dto/reward.dto';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 
 @Controller('api/reward')
@@ -47,9 +51,7 @@ export class RewardController {
   }
 
   @Post('assign-location')
-  async assignLocation(
-    @Body() body: ReplaceRewardLocationsDto
-  ) {
-    return await this.rewardService.replaceRewardLocations(body)
+  async assignLocation(@Body() body: ReplaceRewardLocationsDto) {
+    return await this.rewardService.replaceRewardLocations(body);
   }
 }

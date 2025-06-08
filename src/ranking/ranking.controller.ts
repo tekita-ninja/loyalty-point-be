@@ -9,7 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { RankingService } from './ranking.service';
-import { CreateRankingDto, ReplaceRankingBenefitsDto, ReplaceRankingPromotionsDto, UpdateRankingDto } from './dto/ranking.dto';
+import {
+  CreateRankingDto,
+  ReplaceRankingBenefitsDto,
+  ReplaceRankingPromotionsDto,
+  UpdateRankingDto,
+} from './dto/ranking.dto';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 
 @Controller('api/ranking')
@@ -55,17 +60,12 @@ export class RankingController {
   }
 
   @Post('assign-benefit')
-  async replaceRankingBenefits(
-    @Body() body: ReplaceRankingBenefitsDto
-  ) {
+  async replaceRankingBenefits(@Body() body: ReplaceRankingBenefitsDto) {
     return await this.rankingService.replaceRankingBenefits(body);
   }
 
   @Post('assign-promotion')
-  async replaceRankingPromotion(
-    @Body() body: ReplaceRankingPromotionsDto
-  ) {
+  async replaceRankingPromotion(@Body() body: ReplaceRankingPromotionsDto) {
     return await this.rankingService.replaceRankingPromotion(body);
   }
-
 }

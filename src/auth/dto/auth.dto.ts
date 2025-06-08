@@ -1,6 +1,12 @@
 import { Gender } from '@prisma/client';
 import { Type } from 'class-transformer';
-import { IsDate, IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import {
+  IsDate,
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { IsStrongPassword } from 'src/common/validators/IsStrongPassword';
 export class JwtPayload {
   userId: string;

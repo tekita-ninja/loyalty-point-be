@@ -107,7 +107,7 @@ export class AuthService {
   }
   async signout(req: Request) {
     const authorization = req.headers.authorization;
-    console.log(authorization)
+    console.log(authorization);
     const token = authorization.split(' ').pop();
     const decodeToken = await this.decodeToken(token);
     await this.prisma.user.update({
@@ -128,7 +128,7 @@ export class AuthService {
     });
     return user;
   }
-  
+
   async isEmailUsed(email: string, id?: string) {
     const result = await this.prisma.user.findFirst({
       where: { email },
@@ -137,9 +137,9 @@ export class AuthService {
         email: true,
       },
     });
-    
+
     if (result && id != result.id) {
-        throw new ConflictException('email has been used');
+      throw new ConflictException('email has been used');
     }
 
     return result;
@@ -153,7 +153,7 @@ export class AuthService {
         phone: true,
       },
     });
-    
+
     if (result && id !== result.id) {
       throw new ConflictException('phone has been used');
     }

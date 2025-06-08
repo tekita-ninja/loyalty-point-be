@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
-import { CreateRewardDto, ReplaceRewardLocationsDto, UpdateRewardDto } from './dto/reward.dto';
+import {
+  CreateRewardDto,
+  ReplaceRewardLocationsDto,
+  UpdateRewardDto,
+} from './dto/reward.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Category, Prisma, Reward } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
@@ -222,33 +226,30 @@ export class RewardService {
   }
 
   async replaceRewardLocations(data: ReplaceRewardLocationsDto) {
-    await checkDataById(data.rewardId, this.prismaService.reward)
-    
-    await checkDataByIds(data.locationIds, this.prismaService.location)
+    await checkDataById(data.rewardId, this.prismaService.reward);
 
-    const pivotData = data.locationIds.map(item => ({
+    await checkDataByIds(data.locationIds, this.prismaService.location);
+
+    const pivotData = data.locationIds.map((item) => ({
       rewardId: data.rewardId,
-      locationId: item
-    }))
+      locationId: item,
+    }));
 
-    return await this.prismaService.$transaction(async tx => {
+    return await this.prismaService.$transaction(async (tx) => {
       await tx.rewardLocation.deleteMany({
-        where: { rewardId : data.rewardId }
-      })
+        where: { rewardId: data.rewardId },
+      });
 
-      if(pivotData.length > 0){
+      if (pivotData.length > 0) {
         return await tx.rewardLocation.createMany({
           data: pivotData,
-          skipDuplicates: true
-        })
+          skipDuplicates: true,
+        });
       }
 
       return {
-        count: 0
-      }      
-
-    })
-
+        count: 0,
+      };
+    });
   }
-
 }

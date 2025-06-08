@@ -11,12 +11,11 @@ export class CreateBenefitDto {
 
 export class ReplaceBenefitRankingsDto {
   @IsString()
-  benefitId: string
+  benefitId: string;
 
   @IsArray()
   @ArrayUnique()
-  rankingIds: string[]
+  rankingIds: string[];
 }
-
 
 export class UpdateBenefitDto extends PartialType(CreateBenefitDto) {}

@@ -109,9 +109,8 @@ export class UsersService {
         lastname: body.lastname,
         gender: body.gender,
         status: body.status,
-        birthDate: body.birthDate
+        birthDate: body.birthDate,
       },
-      
     });
   }
 
@@ -123,9 +122,9 @@ export class UsersService {
         email: true,
       },
     });
-    
+
     if (result && id != result.id) {
-        throw new ConflictException('email has been used');
+      throw new ConflictException('email has been used');
     }
 
     return result;
@@ -139,7 +138,7 @@ export class UsersService {
         phone: true,
       },
     });
-    
+
     if (result && id !== result.id) {
       throw new ConflictException('phone has been used');
     }
@@ -193,7 +192,7 @@ export class UsersService {
       },
     });
   }
-  
+
   async replaceUserRole(body: { userId: string; roleIds: string[] }) {
     const user = await this.prisma.user.findUnique({
       where: { id: body.userId },

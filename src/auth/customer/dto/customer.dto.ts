@@ -1,6 +1,14 @@
-import { Gender } from "@prisma/client";
-import { Type } from "class-transformer";
-import { IsDate, IsEmail, IsNotEmpty, IsPhoneNumber, IsString, IsStrongPassword, MaxLength } from "class-validator";
+import { Gender } from '@prisma/client';
+import { Type } from 'class-transformer';
+import {
+  IsDate,
+  IsEmail,
+  IsNotEmpty,
+  IsPhoneNumber,
+  IsString,
+  IsStrongPassword,
+  MaxLength,
+} from 'class-validator';
 
 export class CheckNumberDto {
   @IsPhoneNumber('ID')
@@ -46,10 +54,9 @@ export class CustomerRegisterDto {
 }
 
 export class CustomerLoginDto {
-    @IsString()
-    phone: string
+  @IsString()
+  phone: string;
 
-    @IsString()
-    password: string
-
+  @IsString()
+  password: string;
 }

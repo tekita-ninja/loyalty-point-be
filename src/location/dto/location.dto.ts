@@ -1,11 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import {
-  ArrayNotEmpty,
-  ArrayUnique,
-  IsArray,
-  IsNumber,
-  IsString,
-} from 'class-validator';
+import { ArrayUnique, IsArray, IsNumber, IsString } from 'class-validator';
 
 export class CreateLocationDto {
   @IsString()
@@ -28,8 +22,6 @@ export class ReplaceLocationRewardsDto {
   @IsArray()
   @ArrayUnique()
   rewardIds: string[];
-
-
 }
 
 export class UpdateLocationDto extends PartialType(CreateLocationDto) {}

@@ -41,7 +41,7 @@ import { AuthCustomerModule } from './auth/customer/auth.customer.module';
     BenefitModule,
     RankingModule,
     PromotionModule,
-    AuthCustomerModule
+    AuthCustomerModule,
   ],
   controllers: [],
   providers: [],

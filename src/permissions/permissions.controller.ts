@@ -18,7 +18,6 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { HttpAdapterHost } from '@nestjs/core';
 import { PermissionGuard } from 'src/auth/auth.guard';
-import { CurrentUserId } from 'src/common/decorators/current-user.decorator';
 @UseGuards(AuthGuard('jwt'), PermissionGuard)
 @Controller('api/permissions')
 export class PermissionsController {
@@ -63,8 +62,7 @@ export class PermissionsController {
   }
 
   @Post('set-role')
-  async setRole(@Body() body: { permissionId: string, roleIds: string[]}) {
-    return await this.permissionsService.setRole(body)
+  async setRole(@Body() body: { permissionId: string; roleIds: string[] }) {
+    return await this.permissionsService.setRole(body);
   }
-
 }

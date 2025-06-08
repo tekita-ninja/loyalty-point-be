@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { ArrayNotEmpty, ArrayUnique, IsArray, IsNumber, IsString } from 'class-validator';
+import { ArrayUnique, IsArray, IsNumber, IsString } from 'class-validator';
 
 export class CreateRewardDto {
   @IsString()

@@ -1,8 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
-  Injectable,
   ForbiddenException,
+  Injectable,
 } from '@nestjs/common';
 
 import { Reflector } from '@nestjs/core';
@@ -13,14 +13,17 @@ export class PermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private prisma: PrismaService,
-  ) { }
+  ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const method = request.method.toUpperCase();
 
     let path = request.route?.path || request.url;
-    path = path.replace(/^\/v1\//, '/').replace(/^\//, '').replace('api/', '');
+    path = path
+      .replace(/^\/v1\//, '/')
+      .replace(/^\//, '')
+      .replace('api/', '');
     const permissionCode = `${method}_${path}`;
     // GET ROLE USER;
     const userRoles = await this.prisma.userRole.findMany({
@@ -45,8 +48,11 @@ export class PermissionGuard implements CanActivate {
     const userPermissions = userRoles
       .flatMap((ur) => ur.role.permissions)
       .map((rp) => rp.permission.code);
-    // ,
-    
+
+    if (!userPermissions.includes(permissionCode)) {
+      throw new ForbiddenException(`Missing permission: ${permissionCode}`);
+    }
+
     return true;
   }
 }

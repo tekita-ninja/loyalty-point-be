@@ -235,6 +235,7 @@ ${clientURL}?code=${otp}`,
     const existingPhone = await this.prismaService.user.findUnique({
       where: { phone: tempUser.phone },
     });
+
     if (existingPhone) {
       throw new BadRequestException('Nomor telepon sudah terdaftar!');
     }
@@ -284,11 +285,15 @@ ${clientURL}?code=${otp}`,
             id: lowestRank.id,
           },
         },
-        roles: {
-          connect: [{ id: roleCustomer.id }],
-        },
       },
     });
+
+    await this.prismaService.userRole.create({
+        data: {
+            userId: user.id,
+            roleId: roleCustomer.id
+        }
+    })
 
     return this.toAuthResponse(user);
   }
@@ -306,6 +311,11 @@ ${clientURL}?code=${otp}`,
 
     return this.toAuthResponse(user);
   }
+
+  async editProfile() {
+
+  }
+
 
   async toAuthResponse(user: User) {
     const accessToken = await this.authService.generateAccessToken(user.id);
@@ -377,4 +387,6 @@ ${clientURL}?code=${otp}`,
       permissions: permissions,
     };
   }
+
+
 }

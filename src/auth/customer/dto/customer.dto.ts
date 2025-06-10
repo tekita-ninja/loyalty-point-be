@@ -4,9 +4,11 @@ import {
   IsDate,
   IsEmail,
   IsNotEmpty,
+  IsNumberString,
   IsPhoneNumber,
   IsString,
   IsStrongPassword,
+  Length,
   MaxLength,
 } from 'class-validator';
 
@@ -40,7 +42,8 @@ export class CustomerRegisterDto {
   @IsEmail()
   email: string;
 
-  @IsStrongPassword({ minLength: 6 })
+  @IsNumberString({},{ message: 'Password harus berupa angka' })
+  @Length(6, 6, { message: 'Password harus terdiri dari 6 digit' })
   password: string;
 
   @IsNotEmpty()

@@ -7,7 +7,6 @@ import {
   IsNumberString,
   IsPhoneNumber,
   IsString,
-  IsStrongPassword,
   Length,
   MaxLength,
 } from 'class-validator';
@@ -42,7 +41,7 @@ export class CustomerRegisterDto {
   @IsEmail()
   email: string;
 
-  @IsNumberString({},{ message: 'Password harus berupa angka' })
+  @IsNumberString({}, { message: 'Password harus berupa angka' })
   @Length(6, 6, { message: 'Password harus terdiri dari 6 digit' })
   password: string;
 

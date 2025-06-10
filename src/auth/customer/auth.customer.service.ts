@@ -289,11 +289,11 @@ ${clientURL}?code=${otp}`,
     });
 
     await this.prismaService.userRole.create({
-        data: {
-            userId: user.id,
-            roleId: roleCustomer.id
-        }
-    })
+      data: {
+        userId: user.id,
+        roleId: roleCustomer.id,
+      },
+    });
 
     return this.toAuthResponse(user);
   }
@@ -312,10 +312,7 @@ ${clientURL}?code=${otp}`,
     return this.toAuthResponse(user);
   }
 
-  async editProfile() {
-
-  }
-
+  async editProfile() {}
 
   async toAuthResponse(user: User) {
     const accessToken = await this.authService.generateAccessToken(user.id);
@@ -387,6 +384,4 @@ ${clientURL}?code=${otp}`,
       permissions: permissions,
     };
   }
-
-
 }

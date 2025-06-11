@@ -18,6 +18,7 @@ import { BenefitModule } from './benefit/benefit.module';
 import { RankingModule } from './ranking/ranking.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { AuthCustomerModule } from './auth/customer/auth.customer.module';
+import { RulePointModule } from './rule-point/rule-point.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { AuthCustomerModule } from './auth/customer/auth.customer.module';
     RankingModule,
     PromotionModule,
     AuthCustomerModule,
+    RulePointModule
   ],
   controllers: [],
   providers: [],

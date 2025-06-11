@@ -394,8 +394,6 @@ model Transaction {
 model RulePoint {
   id          String @id @default(uuid())
   multiplier  Decimal @db.Decimal(10,6)
-  point       Int
-  price       Decimal @db.Decimal(15,2)
   isActive    Int
 
   customerPoints CustomerPoint[]

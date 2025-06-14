@@ -418,6 +418,10 @@ model CustomerPoint {
   price       Decimal? @db.Decimal(15,2)
   point       Int
   expired     DateTime?
+  type        Int // 1: add
+  isCancel    Int @default(0) // 0: not canceled, 1: canceled
+  cancelNote  String? @db.VarChar(255)
+  transactionLogs TransactionLog[] 
 
   rulePoint  RulePoint? @relation(fields: [rulePointId], references: [id])
   transaction Transaction? @relation("TransactionToCustomerPoint", fields: [transactionId], references: [id])
@@ -433,7 +437,24 @@ model CustomerPoint {
   @@map("customer_point")
 }
 
+model TransactionLog {
+  id          String @id @default(uuid())
+  customerPointId  String     
+  oldPoints   Int
+  newPoints   Int
+  pointDifference Int
+  action     String @db.VarChar(50) 
 
+  customerPoint    CustomerPoint @relation(fields: [customerPointId], references: [id]) // Many TransactionLogs belong to one CustomerPoint
 
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
 
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
 
+  @@map("transaction_logs")
+  
+}

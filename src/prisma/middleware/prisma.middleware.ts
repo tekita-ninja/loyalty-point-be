@@ -6,6 +6,7 @@ export function useMiddleware(): Prisma.Middleware {
   return async (params, next) => {
     const store = asyncLocalStorage.getStore();
     const userId = store?.userId;
+    console.log(params.model)
     if (
       softDeleteModels.includes(params.model!) &&
       ['findUnique', 'findFirst', 'findMany', 'count'].includes(params.action)
@@ -57,6 +58,7 @@ export function useMiddleware(): Prisma.Middleware {
       softDeleteModels.includes(params.model!) &&
       ['create', 'createMany'].includes(params.action)
     ) {
+      console.log('userId', userId);
       params.args.data = {
         ...params.args.data,
         createdBy: userId,

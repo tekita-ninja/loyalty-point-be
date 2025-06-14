@@ -12,13 +12,14 @@ import { CategoryModule } from './category/category.module';
 import { LocationModule } from './location/location.module';
 import { RewardModule } from './reward/reward.module';
 import { CommonModule } from './common/common.module';
-// import { ScheduleModule } from '@nestjs/schedule';
-// import { ScheduleTasksModule } from './common/schedule/schedule.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduleTasksModule } from './common/schedule/schedule.module';
 import { BenefitModule } from './benefit/benefit.module';
 import { RankingModule } from './ranking/ranking.module';
 import { PromotionModule } from './promotion/promotion.module';
 import { AuthCustomerModule } from './auth/customer/auth.customer.module';
 import { RulePointModule } from './rule-point/rule-point.module';
+import { PointModule } from './point/point.module';
 
 @Module({
   imports: [
@@ -37,13 +38,14 @@ import { RulePointModule } from './rule-point/rule-point.module';
     LocationModule,
     RewardModule,
     CommonModule,
-    // ScheduleModule.forRoot(),
-    // ScheduleTasksModule,
+    ScheduleModule.forRoot(),
+    ScheduleTasksModule,
     BenefitModule,
     RankingModule,
     PromotionModule,
     AuthCustomerModule,
-    RulePointModule
+    RulePointModule, 
+    PointModule
   ],
   controllers: [],
   providers: [],

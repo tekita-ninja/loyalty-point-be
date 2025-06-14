@@ -20,14 +20,14 @@ export class RulePointController {
         return await this.rulePointService.create(body);
     }
 
-    @Get('id')
+    @Get(':id')
     async findOne(
         @Param('id') id: string
     ) {
         return await this.rulePointService.findOne(id)
     }
 
-    @Put('id')
+    @Put(':id')
     async update(
         @Param('id') id: string,
         @Body() body: UpdateRulePointDto
@@ -35,7 +35,7 @@ export class RulePointController {
         return await this.rulePointService.update(id, body)
     }
 
-    @Delete('id')
+    @Delete(':id')
     async delete(
         @Param('id') id: string
     ) {

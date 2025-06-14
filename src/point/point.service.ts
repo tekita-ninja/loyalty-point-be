@@ -194,7 +194,7 @@ export class PointService {
         const orderType = query.sortType || 'desc';
         const orderBy = { [orderField]: orderType };
 
-        const filter: any[] = [];
+        const filter: any[] = [{ transaction: null }];
 
         if(query.isCancel) {
             filter.push({ isCancel: parseInt(query.isCancel) });
@@ -228,10 +228,27 @@ export class PointService {
               ],
             },
             orderBy,
-            include: {
-                rulePoint: true,
-                transaction: true,
+            
+            select: {
+                id: true,
+                userId: true,
+                rulePointId: true,
+                note: true,
+                price: true,
+                point: true,
+                expired: true,
+                type: true,
+                isCancel: true,
+                createdAt: true,
+                createdBy: true,
+                rulePoint: {
+                  select: {
+                    id: true,
+                    multiplier: true,
+                  },
+                },
             },
+            
           },
         );
       }

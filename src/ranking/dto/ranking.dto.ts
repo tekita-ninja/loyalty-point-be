@@ -19,7 +19,7 @@ export class CreateRankingDto {
   minPoints: number;
 
   @IsString()
-  urlPicture: string;
+  rulePointId: string;
 }
 
 export class ReplaceRankingBenefitsDto {

@@ -21,6 +21,8 @@ import { AuthCustomerModule } from './auth/customer/auth.customer.module';
 import { RulePointModule } from './rule-point/rule-point.module';
 import { PointModule } from './point/point.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { CustomerModule } from './customer/customer.module';
+import { TransactionLogModule } from './transaction_log/transaction-log.module';
 
 @Module({
   imports: [
@@ -45,9 +47,11 @@ import { TransactionModule } from './transaction/transaction.module';
     RankingModule,
     PromotionModule,
     AuthCustomerModule,
-    RulePointModule, 
-    PointModule, 
-    TransactionModule
+    RulePointModule,
+    PointModule,
+    TransactionModule,
+    CustomerModule,
+    TransactionLogModule,
   ],
   controllers: [],
   providers: [],

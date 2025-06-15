@@ -219,6 +219,7 @@ export class PromotionService {
     await checkDataById<Promotion>(
       data.promotionId,
       this.prismaService.promotion,
+      'promotion',
     );
 
     await checkDataByIds<Ranking>(data.rankingIds, this.prismaService.ranking);

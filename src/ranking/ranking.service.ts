@@ -27,19 +27,17 @@ export class RankingService {
         name: true,
         minSpendings: true,
         minPoints: true,
-        urlPicture: true,
+        rulePoint: {
+          select: {
+            id: true,
+            multiplier: true,
+          },
+        },
       },
     });
   }
 
   async create(data: CreateRankingDto) {
-    if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
-      data.urlPicture = await this.fileService.copyFileFromTemp(
-        data.urlPicture,
-      );
-    } else {
-      data.urlPicture = await this.fileService.getPathName(data.urlPicture);
-    }
     const reward = await this.prismaService.ranking.create({
       data,
       select: {
@@ -47,11 +45,16 @@ export class RankingService {
         name: true,
         minSpendings: true,
         minPoints: true,
-        urlPicture: true,
+        rulePoint: {
+          select: {
+            id: true,
+            multiplier: true,
+          },
+        },
       },
     });
 
-    return transformUrlPicture(reward);
+    return reward;
   }
 
   async findOne(id: string) {
@@ -63,7 +66,6 @@ export class RankingService {
         name: true,
         minSpendings: true,
         minPoints: true,
-        urlPicture: true,
         benefits: {
           select: {
             benefit: {
@@ -89,24 +91,22 @@ export class RankingService {
             },
           },
         },
+        rulePoint: {
+          select: {
+            id: true,
+            multiplier: true,
+          },
+        },
       },
     });
 
-    return transformUrlPicture(reward);
+    return reward;
   }
 
   async update(id: string, data: UpdateRankingDto) {
     await checkDataById<Ranking>(id, this.prismaService.ranking, 'ranking');
 
-    if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
-      data.urlPicture = await this.fileService.copyFileFromTemp(
-        data.urlPicture,
-      );
-    } else {
-      data.urlPicture = await this.fileService.getPathName(data.urlPicture);
-    }
-
-    const reward = await this.prismaService.ranking.update({
+    const ranking = await this.prismaService.ranking.update({
       where: { id },
       data,
       select: {
@@ -114,28 +114,32 @@ export class RankingService {
         name: true,
         minSpendings: true,
         minPoints: true,
-        urlPicture: true,
+        rulePoint: {
+          select: {
+            id: true,
+            multiplier: true,
+          },
+        },
       },
     });
 
-    return transformUrlPicture(reward);
+    return ranking;
   }
 
   async delete(id: string) {
     await checkDataById<Ranking>(id, this.prismaService.ranking, 'ranking');
 
-    const reward = await this.prismaService.ranking.delete({
+    const ranking = await this.prismaService.ranking.delete({
       where: { id },
       select: {
         id: true,
         name: true,
         minSpendings: true,
         minPoints: true,
-        urlPicture: true,
       },
     });
 
-    return transformUrlPicture(reward);
+    return ranking;
   }
 
   async search(query: QueryParamDto) {
@@ -147,7 +151,7 @@ export class RankingService {
     const orderField = query.sortBy || 'id';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
-    const rewards = await paginate<Ranking, Prisma.RankingFindManyArgs>(
+    const rankings = await paginate<Ranking, Prisma.RankingFindManyArgs>(
       this.prismaService.ranking,
       {
         where: {
@@ -161,12 +165,11 @@ export class RankingService {
           name: true,
           minSpendings: true,
           minPoints: true,
-          urlPicture: true,
         },
       },
     );
 
-    return transformUrlPicture(rewards);
+    return rankings;
   }
 
   async findManyPromotions(rankingId: string, query: QueryParamDto) {

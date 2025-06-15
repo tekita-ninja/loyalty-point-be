@@ -46,7 +46,10 @@ model User {
   status       Boolean @default(true) // 1: active, 0: inactive
   transaction  Transaction[]
   rankingId    String?
-  customerPoints CustomerPoint[] 
+  customerPoints CustomerPoint[]
+  createdTransactionLogs TransactionLog[] @relation("TransactionLogCreatedBy")
+  updatedTransactionLogs TransactionLog[] @relation("TransactionLogUpdatedBy")
+  deletedTransactionLogs TransactionLog[] @relation("TransactionLogDeletedBy")
 
   ranking      Ranking? @relation(fields: [rankingId], references: [id])
 
@@ -184,11 +187,10 @@ model RoleMenu {
   model Ranking {
     id           String @id @default(uuid())
     name         String @db.VarChar(100)
-    urlPicture   String? @db.VarChar(255)
 
     minPoints    Int
     minSpendings Int?
-    rulePointId String? @unique()
+    rulePointId String? 
     
     rulePoint   RulePoint? @relation(fields: [rulePointId], references: [id])
 
@@ -406,7 +408,7 @@ model RulePoint {
   id          String @id @default(uuid())
   multiplier  Decimal @db.Decimal(10,6)
   isActive    Int
-  Ranking     Ranking?
+  Ranking     Ranking[]
 
   customerPoints CustomerPoint[]
 
@@ -458,8 +460,6 @@ model TransactionLog {
   pointDifference Int
   action     String @db.VarChar(50) 
 
-  customerPoint    CustomerPoint @relation(fields: [customerPointId], references: [id]) // Many TransactionLogs belong to one CustomerPoint
-
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   deletedAt DateTime?  
@@ -467,6 +467,12 @@ model TransactionLog {
   createdBy String?
   updatedBy String?
   deletedBy String?
+
+  customerPoint    CustomerPoint @relation(fields: [customerPointId], references: [id]) // Many TransactionLogs belong to one CustomerPoint
+  createdUser            User? @relation("TransactionLogCreatedBy", fields: [createdBy], references: [id]) // Optional relation to User for createdBy
+  updatedUser            User? @relation("TransactionLogUpdatedBy", fields: [updatedBy], references: [id]) // Optional relation to User for updatedBy
+  deletedUser            User? @relation("TransactionLogDeletedBy",fields: [deletedBy], references: [id]) // Optional relation to User for deletedBy
+  
 
   @@map("transaction_logs")
   

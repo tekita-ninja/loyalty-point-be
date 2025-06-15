@@ -1,9 +1,9 @@
-import { IsString } from "class-validator";
+import { IsString } from 'class-validator';
 
 export class ConfirmTransactionCustomerDto {
-    @IsString()
-    transactionId: string;
+  @IsString()
+  transactionId: string;
 
-    @IsString()
-    password: string;
-}   
+  @IsString()
+  password: string;
+}

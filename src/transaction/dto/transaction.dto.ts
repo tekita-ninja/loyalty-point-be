@@ -1,15 +1,15 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsString } from 'class-validator';
 
 export class CreateTransactionDto {
-    @IsString()
-    locationId: string;
+  @IsString()
+  locationId: string;
 
-    @IsString()
-    rewardId: string;
+  @IsString()
+  rewardId: string;
 
-    @IsString()
-    userId: string;
+  @IsString()
+  userId: string;
 
-    @IsString()
-    note: string;
+  @IsString()
+  note: string;
 }

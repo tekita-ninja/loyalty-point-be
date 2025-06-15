@@ -77,7 +77,7 @@ export class AuthCustomerService {
       data: {
         phone: data.phone,
         code: generateOtp,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 1 * 20 * 1000),
         isVerified: false,
       },
     });

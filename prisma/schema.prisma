@@ -181,28 +181,33 @@ model RoleMenu {
   @@map("role_menus")
 }
 
-model Ranking {
-  id           String @id @default(uuid())
-  name         String @db.VarChar(100)
-  urlPicture   String? @db.VarChar(255)
+  model Ranking {
+    id           String @id @default(uuid())
+    name         String @db.VarChar(100)
+    urlPicture   String? @db.VarChar(255)
 
-  minPoints    Int
-  minSpendings Int?
+    minPoints    Int
+    minSpendings Int?
+    rulePointId String? @unique()
+    
+    rulePoint   RulePoint? @relation(fields: [rulePointId], references: [id])
 
-  users        User[]  
-  benefits     RankingBenefit[]
-  promotions   PromotionRanking[]
+    users        User[]  
+    benefits     RankingBenefit[]
+    promotions   PromotionRanking[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
 
-  createdBy String? 
-  updatedBy String?
-  deletedBy String?
 
-  @@map("master_ranking")
-}
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    createdBy String? 
+    updatedBy String?
+    deletedBy String?
+
+    @@map("master_ranking")
+  }
 
 model RankingBenefit {
   id                String @id @default(uuid())
@@ -401,6 +406,7 @@ model RulePoint {
   id          String @id @default(uuid())
   multiplier  Decimal @db.Decimal(10,6)
   isActive    Int
+  Ranking     Ranking?
 
   customerPoints CustomerPoint[]
 

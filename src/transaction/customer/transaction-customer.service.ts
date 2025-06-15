@@ -2,6 +2,8 @@ import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { EnumPointType } from "src/common/enum/Point";
 import { PrismaService } from "src/prisma/prisma.service";
+import { ConfirmTransactionCustomerDto } from "./dto/transaction-customer.dto";
+import { comparePassword } from "src/common/password";
 
 @Injectable()
 export class TransactionCustomerService {
@@ -22,10 +24,19 @@ export class TransactionCustomerService {
         });
     }
 
-    async confirmTransaction(userId: string, transactionId: string) {
+    async confirmTransaction(userId: string, data: ConfirmTransactionCustomerDto) {
+
+        const user = await this.prismaService.user.findUnique({
+           where: { id: userId },
+        });
+
+        if (!user || !(await comparePassword(data.password, user.password))) {
+            throw new BadRequestException('Invalid PIN');
+        }
+
         const transaction = await this.prismaService.transaction.findUnique({
             where: {
-                id: transactionId,
+                id: data.transactionId,
                 userId: userId,
             },
         });
@@ -53,9 +64,9 @@ export class TransactionCustomerService {
         }
 
         return this.prismaService.$transaction(async (tx) => {
-            const newTransaction = await tx.transaction.update({
+            await tx.transaction.update({
                 where: {
-                    id: transactionId,
+                    id: data.transactionId,
                 },
                 data: {
                     status: 1,

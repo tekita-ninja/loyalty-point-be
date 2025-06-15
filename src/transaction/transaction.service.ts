@@ -88,7 +88,9 @@ export class TransactionService {
                       ],
                     },
                     orderBy,                  
-                    
+                    include: {
+                        customerPoint: true,
+                    }
                   },
                 );
         

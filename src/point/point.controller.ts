@@ -38,6 +38,7 @@ export class PointController {
     }
 
     @Get()
+    @UseGuards(AuthGuard('jwt'), PermissionGuard)
     async search(
         @Query() query: QueryParamDto
     ) {

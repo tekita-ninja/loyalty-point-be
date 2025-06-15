@@ -20,6 +20,7 @@ import { PromotionModule } from './promotion/promotion.module';
 import { AuthCustomerModule } from './auth/customer/auth.customer.module';
 import { RulePointModule } from './rule-point/rule-point.module';
 import { PointModule } from './point/point.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -45,7 +46,8 @@ import { PointModule } from './point/point.module';
     PromotionModule,
     AuthCustomerModule,
     RulePointModule, 
-    PointModule
+    PointModule, 
+    TransactionModule
   ],
   controllers: [],
   providers: [],

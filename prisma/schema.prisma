@@ -43,9 +43,10 @@ model User {
   gender       Gender
   birthDate    DateTime 
   refreshToken String?
-  status       Boolean @default(true)
+  status       Boolean @default(true) // 1: active, 0: inactive
   transaction  Transaction[]
   rankingId    String?
+  customerPoints CustomerPoint[] 
 
   ranking      Ranking? @relation(fields: [rankingId], references: [id])
 
@@ -308,6 +309,7 @@ model Location {
   latitude  Float
   longitude Float
 
+  Transactions Transaction[]
   rewards   RewardLocation[]
 
   createdAt DateTime   @default(now())
@@ -370,15 +372,18 @@ model Reward {
 model Transaction {
   id          String @id @default(uuid())
   rewardId    String
+  locationId  String
   userId      String
   note        String @db.VarChar(255)
-  status      Int
+  status      Int @default(0)
   cutPoint    Int
-  expired     DateTime
+  expired     DateTime?
+  date        DateTime @default(now())
   customerPoint CustomerPoint? @relation("TransactionToCustomerPoint")
 
-  reward  Reward @relation(fields: [rewardId], references: [id])
-  user    User   @relation(fields: [userId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+  reward   Reward   @relation(fields: [rewardId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -388,7 +393,8 @@ model Transaction {
   updatedBy String?
   deletedBy String?
 
-  @@map("master_transactions")
+  @@map("transactions" )
+
 }
 
 model RulePoint {
@@ -423,6 +429,7 @@ model CustomerPoint {
   cancelNote  String? @db.VarChar(255)
   transactionLogs TransactionLog[] 
 
+  user        User     @relation(fields: [userId], references: [id])
   rulePoint  RulePoint? @relation(fields: [rulePointId], references: [id])
   transaction Transaction? @relation("TransactionToCustomerPoint", fields: [transactionId], references: [id])
 

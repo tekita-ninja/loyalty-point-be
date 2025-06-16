@@ -62,3 +62,17 @@ export class CustomerLoginDto {
   @IsString()
   password: string;
 }
+
+export class CustomerChangePinDto {
+  @IsNumberString({}, { message: 'Pin harus berupa angka' })
+  @Length(6, 6, { message: 'OLD PIN harus terdiri dari 6 digit' })
+  oldPassword: string;
+
+  @IsNumberString({}, { message: 'Pin harus berupa angka' })
+  @Length(6, 6, { message: 'NEW PIN harus terdiri dari 6 digit' })
+  newPassword: string;
+
+  @IsNumberString({}, { message: 'Pin harus berupa angka' })
+  @Length(6, 6, { message: 'PIN CONFIRMATION harus terdiri dari 6 digit' })
+  confirmationNewPassword: string;
+}

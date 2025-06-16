@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   CheckNumberDto,
+  CustomerChangePinDto,
   CustomerLoginDto,
   CustomerRegisterDto,
   VerifyOtpDto,
@@ -312,8 +313,6 @@ ${clientURL}?code=${otp}`,
     return this.toAuthResponse(user);
   }
 
-  async editProfile() {}
-
   async toAuthResponse(user: User) {
     const accessToken = await this.authService.generateAccessToken(user.id);
     const refreshToken = await this.authService.generateRefreshToken(user.id);
@@ -384,4 +383,40 @@ ${clientURL}?code=${otp}`,
       permissions: permissions,
     };
   }
+
+  async changePin(customerId: string, data: CustomerChangePinDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: customerId },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User tidak ditemukan!');
+    }
+
+    const isValidOldPassword = await comparePassword(data.oldPassword, user.password);
+
+    if (!isValidOldPassword) {
+      throw new BadRequestException('PIN lama anda tidak cocok!');
+    }
+
+
+    if(data.oldPassword === data.newPassword) {
+      throw new BadRequestException('PIN baru tidak boleh sama dengan PIN lama!');
+    }
+
+    if(data.newPassword !== data.confirmationNewPassword) {
+      throw new BadRequestException('PIN baru dan konfirmasi PIN baru tidak cocok!');
+    }
+
+    user.password = await hashPassword(data.newPassword);
+
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: { password: user.password },
+    });
+
+    return { message: 'PIN berhasil diubah!' };
+    
+  }
+
 }

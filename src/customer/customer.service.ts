@@ -4,6 +4,7 @@ import { createPaginator } from 'prisma-pagination';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { checkDataById } from 'src/common/utils/checkDataById';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CustomerUpdateProfileDto } from './dto/customer.dto';
 
 @Injectable()
 export class CustomerService {
@@ -223,6 +224,7 @@ export class CustomerService {
         lastname: true,
         email: true,
         phone: true,
+        birthDate: true,
         createdAt: true,
         updatedAt: true,
         ranking: {
@@ -281,5 +283,16 @@ export class CustomerService {
       ...result,
       totalPoint,
     };
+  }
+
+  async updateProfile(customerId: string, data: CustomerUpdateProfileDto) {
+    await checkDataById(customerId, this.prismaService.user, 'customerId');
+
+    return await this.prismaService.user.update({
+      where: {
+        id: customerId,
+      },
+      data,
+    });
   }
 }

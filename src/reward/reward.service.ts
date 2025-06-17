@@ -11,6 +11,7 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { FileService } from 'src/common/files/files.service';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
+import { start } from 'repl';
 
 @Injectable()
 export class RewardService {
@@ -26,16 +27,38 @@ export class RewardService {
         name: true,
         urlPicture: true,
         price: true,
+        startDate: true,
+        endDate: true,
+        isLimited: true,
+        stocks: true,
         category: {
           select: {
             id: true,
             name: true,
           },
         },
+      likes: {
+            where: { 
+              unlikedAt: null
+            },
+            select: { 
+              id: true, 
+              userId: true,
+              unlikedAt: true,
+              likedAt: true,
+            },
+          },
+        },
       },
-    });
+    );
 
-    return transformUrlPicture(rewards);
+    const rewardsWithLikeStatus = (rewards  as any).map((reward) => ({
+      ...reward,
+      totalLikes: reward.likes.length,
+      likes: undefined,
+    }));
+
+    return transformUrlPicture(rewardsWithLikeStatus);
   }
 
   async create(data: CreateRewardDto) {
@@ -63,12 +86,21 @@ export class RewardService {
             id: data.categoryId,
           },
         },
+        startDate: data.startDate,
+        endDate: data.endDate,
+        stocks: data.stocks,
+        isLimited: data.isLimited,
       },
       select: {
         id: true,
         name: true,
         urlPicture: true,
         price: true,
+        startDate: true,
+        endDate: true,
+        stocks: true,
+        isLimited: true,
+
         category: {
           select: {
             id: true,
@@ -91,29 +123,38 @@ export class RewardService {
         name: true,
         urlPicture: true,
         price: true,
+        startDate: true,
+        endDate: true,
+        stocks: true,
+        isLimited: true,
         category: {
           select: {
             id: true,
             name: true,
           },
         },
-        locations: {
-          select: {
-            location: {
-              select: {
-                id: true,
-                name: true,
-                address: true,
-                latitude: true,
-                longitude: true,
-              },
+        likes: {
+            where: { 
+              unlikedAt: null
+            },
+            select: { 
+              id: true, 
+              userId: true,
+              unlikedAt: true,
+              likedAt: true,
             },
           },
         },
       },
-    });
+    );
 
-    return transformUrlPicture(reward);
+    const rewardsWithLikeStatus ={
+      ...reward,
+      totalLikes: reward.likes.length,
+      likes: undefined,
+    };
+
+    return transformUrlPicture(rewardsWithLikeStatus);
   }
 
   async update(id: string, data: UpdateRewardDto) {
@@ -141,6 +182,10 @@ export class RewardService {
         name: true,
         urlPicture: true,
         price: true,
+        startDate: true,
+        endDate: true,
+        stocks: true,
+        isLimited: true,
         category: {
           select: {
             id: true,
@@ -173,7 +218,23 @@ export class RewardService {
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
-    const filter = [];
+    const filter = [] as any[];
+
+    if(query.startDate) {
+      filter.push({
+        startDate: {
+          gte: new Date(query.startDate),
+        },
+      });
+    }
+
+    if(query.endDate) {
+      filter.push({
+        endDate: {
+          lte: new Date(query.endDate),
+        },
+      });
+    }
 
     if (query.locationId) {
       filter.push({
@@ -212,17 +273,38 @@ export class RewardService {
           name: true,
           urlPicture: true,
           price: true,
+          startDate: true,
+          endDate: true,
+          stocks: true,
+          isLimited: true,
           category: {
             select: {
               id: true,
               name: true,
             },
           },
+          likes: {
+            where: { 
+              unlikedAt: null
+            },
+            select: { 
+              id: true, 
+              userId: true,
+              unlikedAt: true,
+              likedAt: true,
+            },
+          },
         },
       },
     );
 
-    return transformUrlPicture(rewards);
+    const rewardsWithLikeStatus = (rewards.data as any).map((reward) => ({
+      ...reward,
+      totalLikes: reward.likes.length,
+      likes: undefined,
+    }));
+
+    return transformUrlPicture(rewardsWithLikeStatus);
   }
 
   async replaceRewardLocations(data: ReplaceRewardLocationsDto) {
@@ -252,4 +334,57 @@ export class RewardService {
       };
     });
   }
+
+  async likeReward(rewardId: string, userId: string) {
+    await checkDataById<Reward>(rewardId, this.prismaService.reward, 'reward');
+    await checkDataById(userId, this.prismaService.user, 'user');
+
+    const existingLike = await this.prismaService.like.findFirst({
+      where: {
+        rewardId,
+        userId,
+      },
+    });
+
+    if (existingLike) {
+
+      if(existingLike.unlikedAt) {
+        await this.prismaService.like.update({
+          where: {
+            id: existingLike.id,
+          },
+          data: {
+            unlikedAt: null,
+            likedAt: new Date(),
+          },
+        });
+
+        return { status: 'liked' };
+      }
+
+      await this.prismaService.like.update({
+        where: {
+          id: existingLike.id,
+        },
+        data: {
+          unlikedAt: new Date(),
+        }
+      })
+
+      return { status: 'unliked' };
+
+    } else {
+      await this.prismaService.like.create({
+        data: {
+          rewardId,
+          userId,
+          likedAt: new Date(),
+        },
+      });
+
+      return { status: 'liked' }; 
+
+    }
+  }
+
 }

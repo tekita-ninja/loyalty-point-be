@@ -11,6 +11,7 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { RewardService } from 'src/reward/reward.service';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
+import { start } from 'repl';
 
 @Injectable()
 export class LocationService {
@@ -170,7 +171,7 @@ export class LocationService {
     });
   }
 
-  async findManyRewards(locationId: string, query: QueryParamDto) {
+  async findManyRewards(userId: string, locationId: string, query: QueryParamDto) {
     await checkDataById<Location>(
       locationId,
       this.prismaService.location,
@@ -191,6 +192,16 @@ export class LocationService {
           some: { locationId },
         },
       },
+      {
+        startDate: {
+          lte: new Date(),
+        },
+      },
+      {
+        endDate: {
+          gte: new Date(),
+        },
+      },
     ] as any[];
 
     if (query.categoryId) {
@@ -208,7 +219,11 @@ export class LocationService {
       });
     }
 
-    const rewards = await paginate<Reward, Prisma.RewardFindManyArgs>(
+    type RewardWithLikes = Reward &{
+      likes: { id: string }[];
+    }
+
+    const rewards = await paginate<RewardWithLikes, Prisma.RewardFindManyArgs>(
       this.prismaService.reward,
       {
         where: { AND: filter },
@@ -218,16 +233,43 @@ export class LocationService {
           name: true,
           urlPicture: true,
           price: true,
+          startDate: true,
+          endDate: true,
+          stocks: true,
+          isLimited: true,
           category: {
             select: {
               id: true,
               name: true,
             },
           },
+          locations: {
+            where: { locationId },
+          },
+          likes: {
+            where: { 
+              unlikedAt: null
+            },
+            select: { 
+              id: true, 
+              userId: true,
+              unlikedAt: true,
+              likedAt: true,
+            },
+          },
         },
       },
     );
 
-    return transformUrlPicture(rewards);
+    const rewardsWithLikeStatus = rewards.data.map((reward) => ({
+      ...reward,
+      liked: (reward.likes as any).some(
+        (like) => like.userId === userId && like.likedAt !== null && like.unlikedAt === null
+      ),
+      totalLikes: reward.likes.length,
+      likes: undefined,
+    }));
+
+    return transformUrlPicture(rewardsWithLikeStatus);
   }
 }

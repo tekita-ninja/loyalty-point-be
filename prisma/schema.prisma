@@ -52,6 +52,7 @@ model User {
   deletedTransactionLogs TransactionLog[] @relation("TransactionLogDeletedBy")
 
   ranking      Ranking? @relation(fields: [rankingId], references: [id])
+  likes        Like[]
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -362,6 +363,11 @@ model Reward {
   price       Int
   transactions Transaction[]
   locations  RewardLocation[]
+  likes      Like[]
+  isLimited Int @default(0) // 0: unlimited, 1: limited
+  stocks    Int
+  startDate DateTime?
+  endDate DateTime?
 
   category Category @relation(fields: [categoryId], references: [id])
 
@@ -476,4 +482,28 @@ model TransactionLog {
 
   @@map("transaction_logs")
   
+}
+
+
+model Like {
+  id          String @id @default(uuid())
+  userId      String
+  rewardId    String
+
+  user        User   @relation(fields: [userId], references: [id])
+  reward      Reward @relation(fields: [rewardId], references: [id])
+
+  likedAt DateTime   @default(now())
+  unlikedAt DateTime? 
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  deletedAt DateTime?  
+
+  createdBy String?
+  updatedBy String?
+  deletedBy String?
+
+  @@unique([userId, rewardId]) // Ensure a user can like a reward only once
+  @@map("likes")
 }

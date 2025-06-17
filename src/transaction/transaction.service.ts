@@ -97,7 +97,32 @@ export class TransactionService {
         },
         orderBy,
         include: {
-          customerPoint: true,
+          customerPoint:  {
+            select: {
+              id: true,
+              userId: true,
+              note: true,
+              price: true,
+              point: true,
+              expired: true,
+              type: true,
+              isCancel: true,
+              user: {
+                select: {
+                  id: true,
+                  firstname: true,
+                  lastname: true,
+                  email: true,
+                  phone: true,
+                  gender: true,
+                  birthDate: true,
+                  status: true,
+                  ranking: true,
+                }
+              }
+            },
+            
+          }
         },
       },
     );

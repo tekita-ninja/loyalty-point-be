@@ -7,6 +7,8 @@ import {
   Post,
   Put,
   Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { LocationService } from './location.service';
 import {
@@ -15,7 +17,10 @@ import {
   UpdateLocationDto,
 } from './dto/location.dto';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { PermissionGuard } from 'src/auth/auth.guard';
 
+@UseGuards(AuthGuard('jwt'), PermissionGuard)
 @Controller('/api/location')
 export class LocationController {
   constructor(private locationService: LocationService) {}
@@ -59,7 +64,9 @@ export class LocationController {
   async findManyRewards(
     @Param('locationId') locationId: string,
     @Query() query: QueryParamDto,
+    @Request() req: any,
   ) {
-    return await this.locationService.findManyRewards(locationId, query);
+    const userId = req.user.id;
+    return await this.locationService.findManyRewards(userId, locationId, query);
   }
 }

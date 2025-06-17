@@ -1,0 +1,81 @@
+name: Build and Push Docker Image [staging]
+
+on:
+  push:
+    branches:
+      - staging
+      - feat/workflow
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: copy env
+        run: |
+          echo "DATABASE_URL=\"mysql://${{ secrets.STG_DB_USERNAME }}:${{ secrets.STG_DB_PASSWORD }}@${{ secrets.STG_DB_HOST }}/${{ secrets.STG_DB_NAME }}\"" > .env
+          echo "PORT=3000" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
+          echo "DEFAULT_PASSWORD="@Test123"" >> .env
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}:stg-${{ github.sha }} .
+
+      - name: Push Docker image to GHCR
+        run: |
+          docker push ghcr.io/${{ github.repository }}:stg-${{ github.sha }}
+
+  deploy:
+    needs: build-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.TEKITA_STG_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.TEKITA_STG_REMOTE_SERVER }} >> ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "echo 'Connection successful!'"
+
+      - name: change image tag
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\
+            cd ${{ secrets.STG_PROJECT_PATH }}
+            sed -i 's|ghcr.io/.*/elite8-server:.*|ghcr.io/${{ github.repository }}:workflow-${{ github.sha }}|' docker-compose.yml
+            "
+
+      - name: restart service after image change
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\
+            cd ${{ secrets.STG_PROJECT_PATH }}
+            docker-compose up -d --no-deps --build loyalty-point-api
+            "
+
+      - name: clean up unused/old image
+        run: |
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\
+            docker image prune -f
+            "

@@ -40,11 +40,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:workflow-${{ github.sha }} .
+          docker build -t ghcr.io/${{ github.repository }}:stg-${{ github.sha }} .
 
       - name: Push Docker image to GHCR
         run: |
-          docker push ghcr.io/${{ github.repository }}:workflow-${{ github.sha }}
+          docker push ghcr.io/${{ github.repository }}:stg-${{ github.sha }}
 
   deploy:
     needs: build-image
@@ -64,7 +64,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\
             cd ${{ secrets.STG_PROJECT_PATH }}
-            sed -i 's|ghcr.io/.*/loyalloyalty-point-api:.*|ghcr.io/${{ github.repository }}:workflow-${{ github.sha }}|' docker-compose.yml
+            sed -i "s|image: ghcr.io/.*/loyalty-point-be:.*|image: ghcr.io/${{ github.repository }}:stg-${{ github.sha }}|" docker-compose.yml
             "
 
       - name: restart service after image change

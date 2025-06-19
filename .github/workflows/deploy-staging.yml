@@ -70,7 +70,7 @@ jobs:
               in_block && \$1 == "image:" { \$2 = new_image; in_block=0 }
               { print }
             '\'' docker-compose.yml > docker-compose.tmp && mv docker-compose.tmp docker-compose.yml
-          "
+            "
       - name: restart service after image change
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\

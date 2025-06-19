@@ -63,10 +63,14 @@ jobs:
       - name: change image tag
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\
-            cd ${{ secrets.STG_PROJECT_PATH }}
-            sed -i 's|image: ghcr.io/.*/loyalty-point-be:.*|image: ghcr.io/${{ github.repository }}:stg-${{ github.sha }}|' docker-compose.yml
-            "
-
+            cd ${{ secrets.STG_PROJECT_PATH }} && pwd\
+            awk -v new_image='ghcr.io/${{ github.repository }}:stg-${{ github.sha }}' \
+            '\''
+              \$0 ~ /^  loyalty-point-api:$/ { in_block=1 }
+              in_block && \$1 == "image:" { \$2 = new_image; in_block=0 }
+              { print }
+            '\'' docker-compose.yml > docker-compose.tmp && mv docker-compose.tmp docker-compose.yml
+          "
       - name: restart service after image change
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\

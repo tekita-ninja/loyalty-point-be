@@ -10,7 +10,6 @@ import {
 import axios from 'axios';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
-import { User } from '@prisma/client';
 import { comparePassword, hashPassword } from 'src/common/password';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
@@ -273,7 +272,7 @@ ${clientURL}?code=${otp}`,
 
     data.password = await hashPassword(data.password);
 
-    const user = await this.prismaService.user.create({
+    const newUser = await this.prismaService.user.create({
       data: {
         firstname: data.firstname,
         lastname: data.lastname,
@@ -292,8 +291,70 @@ ${clientURL}?code=${otp}`,
 
     await this.prismaService.userRole.create({
       data: {
-        userId: user.id,
+        userId: newUser.id,
         roleId: roleCustomer.id,
+      },
+    });
+
+    const user = await this.prismaService.user.findFirst({
+      where: { phone: newUser.phone },
+      select: {
+        id: true,
+        phone: true,
+        firstname: true,
+        lastname: true,
+        password: true,
+        ranking: {
+          select: {
+            id: true,
+            name: true,
+            minPoints: true,
+            minSpendings: true,
+            rulePoint: {
+              select: {
+                id: true,
+                multiplier: true,
+              },
+            },
+            promotions: {
+              where: {
+                promotion: {
+                  startDate: { lte: new Date() },
+                  endDate: { gte: new Date() },
+                },
+              },
+              select: {
+                promotion: {
+                  select: {
+                    id: true,
+                    title: true,
+                    subtitle: true,
+                    description: true,
+                    urlPicture: true,
+                    startDate: true,
+                    endDate: true,
+                    isPush: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        customerPoints: {
+          where: {
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
+          },
+          select: {
+            id: true,
+            transactionId: true,
+            rulePointId: true,
+            point: true,
+            price: true,
+            type: true,
+            isCancel: true,
+            expired: true,
+          },
+        },
       },
     });
 
@@ -347,7 +408,7 @@ ${clientURL}?code=${otp}`,
         },
         customerPoints: {
           where: {
-            isCancel: 0,
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
           },
           select: {
             id: true,
@@ -360,7 +421,7 @@ ${clientURL}?code=${otp}`,
             expired: true,
           },
         },
-      }
+      },
     });
 
     if (!user || !(await comparePassword(data.password, user.password))) {
@@ -441,25 +502,28 @@ ${clientURL}?code=${otp}`,
       roles: roles.map((i) => i.role.name),
       permissions: permissions,
       ranking: user.ranking,
-      customerPoints: user.customerPoints
+      customerPoints: user.customerPoints,
     };
 
     const resultWithTotalPoint = {
       ...result,
-      totalPoint: result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0
-    }
+      totalPoint:
+        result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+    };
 
     const transformedResult = {
       ...resultWithTotalPoint,
-      ranking: resultWithTotalPoint.ranking ? {
-        ...resultWithTotalPoint.ranking,
-        promotions: resultWithTotalPoint.ranking.promotions.map(promo => transformUrlPicture(promo.promotion))
-      } 
-      : null
-    }
-    
-    return transformedResult;
+      ranking: resultWithTotalPoint.ranking
+        ? {
+            ...resultWithTotalPoint.ranking,
+            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+              transformUrlPicture(promo.promotion),
+            ),
+          }
+        : null,
+    };
 
+    return transformedResult;
   }
 
   async changePin(customerId: string, data: CustomerChangePinDto) {

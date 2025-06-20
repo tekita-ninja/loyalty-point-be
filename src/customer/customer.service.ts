@@ -6,10 +6,14 @@ import { checkDataById } from 'src/common/utils/checkDataById';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomerUpdateProfileDto } from './dto/customer.dto';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
+import { PointService } from 'src/point/point.service';
 
 @Injectable()
 export class CustomerService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly pointService: PointService, // Assuming you have a PointService for handling points
+  ) {}
 
   async findAll() {
     return await this.prismaService.user.findMany({
@@ -36,6 +40,7 @@ export class CustomerService {
   }
 
   async findOne(id: string) {
+    await this.pointService.isExpiredPoints(id); // Check and update expired points
     const result = await this.prismaService.user.findUnique({
       where: {
         id: id,
@@ -64,8 +69,7 @@ export class CustomerService {
         },
         customerPoints: {
           where: {
-            isCancel: 0,
-            expired: { gte: new Date() },
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
           },
           select: {
             id: true,
@@ -188,8 +192,7 @@ export class CustomerService {
           },
           customerPoints: {
             where: {
-              isCancel: 0,
-              expired: { gte: new Date() },
+              AND: [{ isCancel: 0 }, { isExpired: 0 }],
             },
             select: {
               point: true,
@@ -214,6 +217,8 @@ export class CustomerService {
   }
 
   async findProfile(customerId: string) {
+    await this.pointService.isExpiredPoints(customerId); // Check and update expired points
+
     await checkDataById(customerId, this.prismaService.user, 'customerId');
     const result = await this.prismaService.user.findUnique({
       where: {
@@ -266,8 +271,7 @@ export class CustomerService {
         },
         customerPoints: {
           where: {
-            isCancel: 0,
-            expired: { gte: new Date() },
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
           },
           select: {
             id: true,
@@ -283,27 +287,29 @@ export class CustomerService {
       },
     });
 
-   
-      
-
     const resultWithTotalPoint = {
       ...result,
-      totalPoint: result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0
-    }
+      totalPoint:
+        result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+    };
 
     const transformedResult = {
       ...resultWithTotalPoint,
-      ranking: resultWithTotalPoint.ranking ? {
-        ...resultWithTotalPoint.ranking,
-        promotions: resultWithTotalPoint.ranking.promotions.map(promo => transformUrlPicture(promo.promotion))
-      } 
-      : null
-    }
+      ranking: resultWithTotalPoint.ranking
+        ? {
+            ...resultWithTotalPoint.ranking,
+            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+              transformUrlPicture(promo.promotion),
+            ),
+          }
+        : null,
+    };
 
     return transformedResult;
   }
 
   async updateProfile(customerId: string, data: CustomerUpdateProfileDto) {
+    await this.pointService.isExpiredPoints(customerId); // Check and update expired points
     await checkDataById(customerId, this.prismaService.user, 'customerId');
 
     const result = await this.prismaService.user.update({
@@ -358,7 +364,7 @@ export class CustomerService {
         },
         customerPoints: {
           where: {
-            isCancel: 0,
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
           },
           select: {
             id: true,
@@ -375,17 +381,21 @@ export class CustomerService {
     });
     const resultWithTotalPoint = {
       ...result,
-      totalPoint: result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0
-    }
+      totalPoint:
+        result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+    };
 
     const transformedResult = {
       ...resultWithTotalPoint,
-      ranking: resultWithTotalPoint.ranking ? {
-        ...resultWithTotalPoint.ranking,
-        promotions: resultWithTotalPoint.ranking.promotions.map(promo => transformUrlPicture(promo.promotion))
-      } 
-      : null
-    }
+      ranking: resultWithTotalPoint.ranking
+        ? {
+            ...resultWithTotalPoint.ranking,
+            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+              transformUrlPicture(promo.promotion),
+            ),
+          }
+        : null,
+    };
 
     return transformedResult;
   }

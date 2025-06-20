@@ -97,7 +97,7 @@ export class TransactionService {
         },
         orderBy,
         include: {
-          customerPoint:  {
+          customerPoint: {
             select: {
               id: true,
               userId: true,
@@ -118,11 +118,10 @@ export class TransactionService {
                   birthDate: true,
                   status: true,
                   ranking: true,
-                }
-              }
+                },
+              },
             },
-            
-          }
+          },
         },
       },
     );

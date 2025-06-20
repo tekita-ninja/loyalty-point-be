@@ -41,4 +41,11 @@ export class PointController {
   async search(@Query() query: QueryParamDto) {
     return await this.pointService.search(query);
   }
+
+  @Get('get-point')
+  @UseGuards(AuthGuard('jwt'), PermissionGuard)
+  async getPoint(@Request() req: any) {
+    const userId = req.user.jwtUserId;
+    return await this.pointService.getPointByUserId(userId);
+  }
 }

@@ -195,11 +195,11 @@ export class RankingService {
             {
               rankings: {
                 some: { rankingId },
-              }, 
-              startDate: {  lte: new Date() },
+              },
+              startDate: { lte: new Date() },
               endDate: { gte: new Date() },
-            }
-        ]
+            },
+          ],
         },
         orderBy,
         select: {

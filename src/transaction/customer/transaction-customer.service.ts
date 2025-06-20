@@ -4,7 +4,7 @@ import { EnumPointType } from 'src/common/enum/Point';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfirmTransactionCustomerDto } from './dto/transaction-customer.dto';
 import { comparePassword } from 'src/common/password';
-import { EnumTransactionLog } from 'src/common/enum/TransactionLog';
+import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
 
 @Injectable()
 export class TransactionCustomerService {
@@ -29,7 +29,7 @@ export class TransactionCustomerService {
   ) {
     const oldPointsAgg = await this.prismaService.customerPoint.aggregate({
       _sum: { point: true },
-      where: { AND: [{ userId: userId }, { isCancel: 0 }] },
+      where: { AND: [{ userId: userId }, { isCancel: 0 }, { isExpired: 0 }] },
     });
 
     const oldPoints = oldPointsAgg._sum.point ?? 0;
@@ -89,9 +89,6 @@ export class TransactionCustomerService {
         },
       });
 
-      const expiredDate = new Date();
-      expiredDate.setMonth(expiredDate.getMonth() + 1);
-
       const newCustomerPoint = await tx.customerPoint.create({
         data: {
           userId: userId,
@@ -100,7 +97,7 @@ export class TransactionCustomerService {
           note: `${transaction.note}`,
           createdBy: transaction.userId,
           type: EnumPointType.TRANSACTION,
-          expired: expiredDate,
+          isExpired: 0,
         } as Prisma.CustomerPointUncheckedCreateInput,
         include: {
           transaction: true,
@@ -113,7 +110,7 @@ export class TransactionCustomerService {
           oldPoints,
           newPoints: oldPoints + updatedTransaction.cutPoint,
           pointDifference: updatedTransaction.cutPoint,
-          action: EnumTransactionLog.TRANSACTION,
+          action: EnumTransactionLogAction.TRANSACTION,
         },
       });
 

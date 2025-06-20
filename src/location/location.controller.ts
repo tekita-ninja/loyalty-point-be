@@ -67,6 +67,10 @@ export class LocationController {
     @Request() req: any,
   ) {
     const userId = req.user.id;
-    return await this.locationService.findManyRewards(userId, locationId, query);
+    return await this.locationService.findManyRewards(
+      userId,
+      locationId,
+      query,
+    );
   }
 }

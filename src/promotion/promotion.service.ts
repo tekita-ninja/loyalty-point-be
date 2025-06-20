@@ -47,7 +47,7 @@ export class PromotionService {
 
     data = { ...data, isPush: 0 };
 
-    const reward = await this.prismaService.promotion.create({
+    const promotion = await this.prismaService.promotion.create({
       data,
       select: {
         id: true,
@@ -61,7 +61,7 @@ export class PromotionService {
       },
     });
 
-    return reward;
+    return transformUrlPicture(promotion);
   }
 
   async findOne(id: string) {
@@ -71,7 +71,7 @@ export class PromotionService {
       'promotion',
     );
 
-    const reward = await this.prismaService.promotion.findUnique({
+    const promotion = await this.prismaService.promotion.findUnique({
       where: { id },
       select: {
         id: true,
@@ -97,7 +97,7 @@ export class PromotionService {
       },
     });
 
-    return transformUrlPicture(reward);
+    return transformUrlPicture(promotion);
   }
 
   async update(id: string, data: UpdatePromotionDto) {
@@ -106,8 +106,6 @@ export class PromotionService {
       this.prismaService.promotion,
       'promotion',
     );
-
-    console.log(await this.fileService.isFileExistsInUpload(data.urlPicture));
 
     if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
       data.urlPicture = await this.fileService.copyFileFromTemp(
@@ -119,7 +117,7 @@ export class PromotionService {
 
     data = { ...data, isPush: 0 };
 
-    const rewards = await this.prismaService.promotion.update({
+    const promotions = await this.prismaService.promotion.update({
       where: { id },
       data,
       select: {
@@ -134,7 +132,7 @@ export class PromotionService {
       },
     });
 
-    return transformUrlPicture(rewards);
+    return transformUrlPicture(promotions);
   }
 
   async delete(id: string) {
@@ -144,7 +142,7 @@ export class PromotionService {
       'promotion',
     );
 
-    const reward = await this.prismaService.promotion.delete({
+    const promotion = await this.prismaService.promotion.delete({
       where: { id },
       select: {
         id: true,
@@ -158,7 +156,7 @@ export class PromotionService {
       },
     });
 
-    return transformUrlPicture(reward);
+    return transformUrlPicture(promotion);
   }
 
   async search(query: QueryParamDto) {

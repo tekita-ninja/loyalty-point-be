@@ -35,14 +35,10 @@ export class AuthCustomerController {
     return this.authCustomerService.signIn(body);
   }
 
-
   @UseGuards(AuthGuard('jwt'), PermissionGuard)
-  @Post('change-pin') 
-  async changePin(
-    @Body() body: CustomerChangePinDto,
-    @Req() req: any,
-  ) {
-    const customerId = req.user.id 
-    return this.authCustomerService.changePin(customerId, body)
+  @Post('change-pin')
+  async changePin(@Body() body: CustomerChangePinDto, @Req() req: any) {
+    const customerId = req.user.id;
+    return this.authCustomerService.changePin(customerId, body);
   }
 }

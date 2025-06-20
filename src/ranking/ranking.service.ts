@@ -191,9 +191,15 @@ export class RankingService {
       this.prismaService.promotion,
       {
         where: {
-          rankings: {
-            some: { rankingId },
-          },
+          AND: [
+            {
+              rankings: {
+                some: { rankingId },
+              }, 
+              startDate: {  lte: new Date() },
+              endDate: { gte: new Date() },
+            }
+        ]
         },
         orderBy,
         select: {

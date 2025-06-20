@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfirmTransactionCustomerDto } from './dto/transaction-customer.dto';
 import { comparePassword } from 'src/common/password';
 import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
+import { EnumTransactionStatus } from 'src/common/enum/Transaction';
 
 @Injectable()
 export class TransactionCustomerService {
@@ -59,6 +60,10 @@ export class TransactionCustomerService {
       throw new BadRequestException('Transaction has expired');
     }
 
+    if (oldPoints < transaction.cutPoint) {
+      throw new BadRequestException('Insufficient points');
+    }
+
     const customerPoint = await this.prismaService.customerPoint.findUnique({
       where: {
         userId: userId,
@@ -76,16 +81,46 @@ export class TransactionCustomerService {
     }
 
     return this.prismaService.$transaction(async (tx) => {
+      const reward = await this.prismaService.reward.findUnique({
+        where: {
+          id: transaction.rewardId,
+        },
+        select: {
+          stocks: true,
+        },
+      });
+
+      if (!reward) {
+        throw new BadRequestException('Reward not found');
+      }
+
+      if(reward.stocks < 1) {
+        throw new BadRequestException('Reward is out of stock');
+      }
+
       const updatedTransaction = await tx.transaction.update({
         where: {
           id: data.transactionId,
         },
         data: {
-          status: 1,
+          status: EnumTransactionStatus.CONFIRMED,
         },
         select: {
           id: true,
           cutPoint: true,
+          rewardId: true,
+        },
+      });
+
+
+      await tx.reward.update({
+        where: {
+          id: updatedTransaction.rewardId,
+        },
+        data: {
+          stocks: {
+            decrement: 1,
+          },
         },
       });
 
@@ -108,8 +143,8 @@ export class TransactionCustomerService {
         data: {
           customerPointId: newCustomerPoint.id,
           oldPoints,
-          newPoints: oldPoints + updatedTransaction.cutPoint,
-          pointDifference: updatedTransaction.cutPoint,
+          newPoints: oldPoints - updatedTransaction.cutPoint,
+          pointDifference: -updatedTransaction.cutPoint,
           action: EnumTransactionLogAction.TRANSACTION,
         },
       });

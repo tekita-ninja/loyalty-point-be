@@ -363,9 +363,11 @@ model Reward {
   urlPicture  String  @db.VarChar(100)
   // price       Decimal @db.Decimal(15, 2)
   price       Int
+
   transactions Transaction[]
   locations  RewardLocation[]
   likes      Like[]
+
   isLimited Int @default(0) // 0: unlimited, 1: limited
   stocks    Int
   startDate DateTime?

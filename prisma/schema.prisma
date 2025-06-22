@@ -46,6 +46,8 @@ model User {
   birthDate    DateTime 
   refreshToken String?
   status       Boolean @default(true) // 1: active, 0: inactive
+  exprPoints   DateTime?
+
   transaction  Transaction[]
   rankingId    String?
   customerPoints CustomerPoint[]
@@ -363,9 +365,11 @@ model Reward {
   urlPicture  String  @db.VarChar(100)
   // price       Decimal @db.Decimal(15, 2)
   price       Int
+
   transactions Transaction[]
   locations  RewardLocation[]
   likes      Like[]
+
   isLimited Int @default(0) // 0: unlimited, 1: limited
   stocks    Int
   startDate DateTime?
@@ -439,10 +443,11 @@ model CustomerPoint {
   note        String @db.VarChar(255)  
   price       Decimal? @db.Decimal(15,2)
   point       Int
-  expired     DateTime?
   type        Int // 1: add
   isCancel    Int @default(0) // 0: not canceled, 1: canceled
+  isExpired   Int @default(0) // 0: not expired, 1: expired
   cancelNote  String? @db.VarChar(255)
+
   transactionLogs TransactionLog[] 
 
   user        User     @relation(fields: [userId], references: [id])

@@ -1,5 +1,13 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { ArrayUnique, IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayUnique,
+  IsArray,
+  IsDate,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateRewardDto {
   @IsString()
@@ -14,20 +22,20 @@ export class CreateRewardDto {
   @IsString()
   categoryId: string;
 
-  @IsString()
-  @IsOptional()
-  startDate?: string;
-
-  @IsString()
-  @IsOptional()
-  endDate?: string
-
   @IsNumber()
-  stocks: number
-
+  stocks: number;
+  
   @IsNumber()
   isLimited: number;
-} 
+
+  @IsDate()
+  @Type(() => Date)
+  startDate: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  endDate: Date;
+}
 
 export class ReplaceRewardLocationsDto {
   @IsString()

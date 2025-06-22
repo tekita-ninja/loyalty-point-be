@@ -11,7 +11,6 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { FileService } from 'src/common/files/files.service';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
-import { start } from 'repl';
 
 @Injectable()
 export class RewardService {
@@ -37,22 +36,21 @@ export class RewardService {
             name: true,
           },
         },
-      likes: {
-            where: { 
-              unlikedAt: null
-            },
-            select: { 
-              id: true, 
-              userId: true,
-              unlikedAt: true,
-              likedAt: true,
-            },
+        likes: {
+          where: {
+            unlikedAt: null,
+          },
+          select: {
+            id: true,
+            userId: true,
+            unlikedAt: true,
+            likedAt: true,
           },
         },
       },
-    );
+    });
 
-    const rewardsWithLikeStatus = (rewards  as any).map((reward) => ({
+    const rewardsWithLikeStatus = (rewards as any).map((reward) => ({
       ...reward,
       totalLikes: reward.likes.length,
       likes: undefined,
@@ -134,21 +132,20 @@ export class RewardService {
           },
         },
         likes: {
-            where: { 
-              unlikedAt: null
-            },
-            select: { 
-              id: true, 
-              userId: true,
-              unlikedAt: true,
-              likedAt: true,
-            },
+          where: {
+            unlikedAt: null,
+          },
+          select: {
+            id: true,
+            userId: true,
+            unlikedAt: true,
+            likedAt: true,
           },
         },
       },
-    );
+    });
 
-    const rewardsWithLikeStatus ={
+    const rewardsWithLikeStatus = {
       ...reward,
       totalLikes: reward.likes.length,
       likes: undefined,
@@ -220,7 +217,7 @@ export class RewardService {
 
     const filter = [] as any[];
 
-    if(query.startDate) {
+    if (query.startDate) {
       filter.push({
         startDate: {
           gte: new Date(query.startDate),
@@ -228,7 +225,7 @@ export class RewardService {
       });
     }
 
-    if(query.endDate) {
+    if (query.endDate) {
       filter.push({
         endDate: {
           lte: new Date(query.endDate),
@@ -261,6 +258,18 @@ export class RewardService {
       });
     }
 
+    if (typeof query.isLimited == "number") {
+      filter.push({
+        isLimited: query.isLimited
+      })
+    }
+
+    if(typeof query.isLowStock == "number") {
+      filter.push({
+        stocks: {lt: 10 }
+      })
+    }
+
     const whereStatement = filter.length > 0 ? { AND: filter } : {};
 
     const rewards = await paginate<Reward, Prisma.RewardFindManyArgs>(
@@ -284,11 +293,11 @@ export class RewardService {
             },
           },
           likes: {
-            where: { 
-              unlikedAt: null
+            where: {
+              unlikedAt: null,
             },
-            select: { 
-              id: true, 
+            select: {
+              id: true,
               userId: true,
               unlikedAt: true,
               likedAt: true,
@@ -347,8 +356,7 @@ export class RewardService {
     });
 
     if (existingLike) {
-
-      if(existingLike.unlikedAt) {
+      if (existingLike.unlikedAt) {
         await this.prismaService.like.update({
           where: {
             id: existingLike.id,
@@ -368,11 +376,10 @@ export class RewardService {
         },
         data: {
           unlikedAt: new Date(),
-        }
-      })
+        },
+      });
 
       return { status: 'unliked' };
-
     } else {
       await this.prismaService.like.create({
         data: {
@@ -382,9 +389,7 @@ export class RewardService {
         },
       });
 
-      return { status: 'liked' }; 
-
+      return { status: 'liked' };
     }
   }
-
 }

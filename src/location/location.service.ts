@@ -11,7 +11,6 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { RewardService } from 'src/reward/reward.service';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
-import { start } from 'repl';
 
 @Injectable()
 export class LocationService {
@@ -171,7 +170,11 @@ export class LocationService {
     });
   }
 
-  async findManyRewards(userId: string, locationId: string, query: QueryParamDto) {
+  async findManyRewards(
+    userId: string,
+    locationId: string,
+    query: QueryParamDto,
+  ) {
     await checkDataById<Location>(
       locationId,
       this.prismaService.location,
@@ -219,9 +222,9 @@ export class LocationService {
       });
     }
 
-    type RewardWithLikes = Reward &{
+    type RewardWithLikes = Reward & {
       likes: { id: string }[];
-    }
+    };
 
     const rewards = await paginate<RewardWithLikes, Prisma.RewardFindManyArgs>(
       this.prismaService.reward,
@@ -247,11 +250,11 @@ export class LocationService {
             where: { locationId },
           },
           likes: {
-            where: { 
-              unlikedAt: null
+            where: {
+              unlikedAt: null,
             },
-            select: { 
-              id: true, 
+            select: {
+              id: true,
               userId: true,
               unlikedAt: true,
               likedAt: true,
@@ -264,7 +267,10 @@ export class LocationService {
     const rewardsWithLikeStatus = rewards.data.map((reward) => ({
       ...reward,
       liked: (reward.likes as any).some(
-        (like) => like.userId === userId && like.likedAt !== null && like.unlikedAt === null
+        (like) =>
+          like.userId === userId &&
+          like.likedAt !== null &&
+          like.unlikedAt === null,
       ),
       totalLikes: reward.likes.length,
       likes: undefined,

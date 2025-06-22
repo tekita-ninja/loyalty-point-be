@@ -23,6 +23,7 @@ import { PointModule } from './point/point.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { CustomerModule } from './customer/customer.module';
 import { TransactionLogModule } from './transaction_log/transaction-log.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { TransactionLogModule } from './transaction_log/transaction-log.module';
     TransactionModule,
     CustomerModule,
     TransactionLogModule,
+    DashboardModule
   ],
   controllers: [],
   providers: [],

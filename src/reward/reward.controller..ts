@@ -65,7 +65,7 @@ export class RewardController {
   async likeReward(
     @Param('id') id: string,
     @Request() req: any, // Assuming you want to access the request object
-) {
+  ) {
     const customerId = req.user.id;
     return await this.rewardService.likeReward(id, customerId);
   }

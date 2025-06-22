@@ -10,8 +10,8 @@ import {
 import axios from 'axios';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
-import { User } from '@prisma/client';
 import { comparePassword, hashPassword } from 'src/common/password';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class AuthCustomerService {
@@ -257,13 +257,13 @@ ${clientURL}?code=${otp}`,
     }
 
     let lowestRank = await this.prismaService.ranking.findFirst({
-      where: { name: 'Bronze' },
+      where: { name: 'Silver' },
     });
 
     if (!lowestRank) {
       lowestRank = await this.prismaService.ranking.create({
         data: {
-          name: 'Bronze',
+          name: 'Silver',
           minPoints: 100,
           minSpendings: 100,
         },
@@ -272,7 +272,7 @@ ${clientURL}?code=${otp}`,
 
     data.password = await hashPassword(data.password);
 
-    const user = await this.prismaService.user.create({
+    const newUser = await this.prismaService.user.create({
       data: {
         firstname: data.firstname,
         lastname: data.lastname,
@@ -291,8 +291,70 @@ ${clientURL}?code=${otp}`,
 
     await this.prismaService.userRole.create({
       data: {
-        userId: user.id,
+        userId: newUser.id,
         roleId: roleCustomer.id,
+      },
+    });
+
+    const user = await this.prismaService.user.findFirst({
+      where: { phone: newUser.phone },
+      select: {
+        id: true,
+        phone: true,
+        firstname: true,
+        lastname: true,
+        password: true,
+        ranking: {
+          select: {
+            id: true,
+            name: true,
+            minPoints: true,
+            minSpendings: true,
+            rulePoint: {
+              select: {
+                id: true,
+                multiplier: true,
+              },
+            },
+            promotions: {
+              where: {
+                promotion: {
+                  startDate: { lte: new Date() },
+                  endDate: { gte: new Date() },
+                },
+              },
+              select: {
+                promotion: {
+                  select: {
+                    id: true,
+                    title: true,
+                    subtitle: true,
+                    description: true,
+                    urlPicture: true,
+                    startDate: true,
+                    endDate: true,
+                    isPush: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        customerPoints: {
+          where: {
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
+          },
+          select: {
+            id: true,
+            transactionId: true,
+            rulePointId: true,
+            point: true,
+            price: true,
+            type: true,
+            isCancel: true,
+            isExpired: true,
+          },
+        },
       },
     });
 
@@ -302,6 +364,64 @@ ${clientURL}?code=${otp}`,
   async signIn(data: CustomerLoginDto) {
     const user = await this.prismaService.user.findFirst({
       where: { phone: data.phone },
+      select: {
+        id: true,
+        phone: true,
+        firstname: true,
+        lastname: true,
+        password: true,
+        ranking: {
+          select: {
+            id: true,
+            name: true,
+            minPoints: true,
+            minSpendings: true,
+            rulePoint: {
+              select: {
+                id: true,
+                multiplier: true,
+              },
+            },
+            promotions: {
+              where: {
+                promotion: {
+                  startDate: { lte: new Date() },
+                  endDate: { gte: new Date() },
+                },
+              },
+              select: {
+                promotion: {
+                  select: {
+                    id: true,
+                    title: true,
+                    subtitle: true,
+                    description: true,
+                    urlPicture: true,
+                    startDate: true,
+                    endDate: true,
+                    isPush: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        customerPoints: {
+          where: {
+            AND: [{ isCancel: 0 }, { isExpired: 0 }],
+          },
+          select: {
+            id: true,
+            transactionId: true,
+            rulePointId: true,
+            point: true,
+            price: true,
+            type: true,
+            isCancel: true,
+            isExpired: true,
+          },
+        },
+      },
     });
 
     if (!user || !(await comparePassword(data.password, user.password))) {
@@ -313,7 +433,7 @@ ${clientURL}?code=${otp}`,
     return this.toAuthResponse(user);
   }
 
-  async toAuthResponse(user: User) {
+  async toAuthResponse(user: any) {
     const accessToken = await this.authService.generateAccessToken(user.id);
     const refreshToken = await this.authService.generateRefreshToken(user.id);
     await this.prismaService.user.update({
@@ -369,7 +489,7 @@ ${clientURL}?code=${otp}`,
       return `${item.name}`;
     });
 
-    return {
+    const result = {
       user: {
         id: user.id,
         phone: user.phone,
@@ -381,7 +501,29 @@ ${clientURL}?code=${otp}`,
       refreshToken,
       roles: roles.map((i) => i.role.name),
       permissions: permissions,
+      ranking: user.ranking,
+      customerPoints: user.customerPoints,
     };
+
+    const resultWithTotalPoint = {
+      ...result,
+      totalPoint:
+        result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+    };
+
+    const transformedResult = {
+      ...resultWithTotalPoint,
+      ranking: resultWithTotalPoint.ranking
+        ? {
+            ...resultWithTotalPoint.ranking,
+            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+              transformUrlPicture(promo.promotion),
+            ),
+          }
+        : null,
+    };
+
+    return transformedResult;
   }
 
   async changePin(customerId: string, data: CustomerChangePinDto) {
@@ -393,19 +535,25 @@ ${clientURL}?code=${otp}`,
       throw new BadRequestException('User tidak ditemukan!');
     }
 
-    const isValidOldPassword = await comparePassword(data.oldPassword, user.password);
+    const isValidOldPassword = await comparePassword(
+      data.oldPassword,
+      user.password,
+    );
 
     if (!isValidOldPassword) {
       throw new BadRequestException('PIN lama anda tidak cocok!');
     }
 
-
-    if(data.oldPassword === data.newPassword) {
-      throw new BadRequestException('PIN baru tidak boleh sama dengan PIN lama!');
+    if (data.oldPassword === data.newPassword) {
+      throw new BadRequestException(
+        'PIN baru tidak boleh sama dengan PIN lama!',
+      );
     }
 
-    if(data.newPassword !== data.confirmationNewPassword) {
-      throw new BadRequestException('PIN baru dan konfirmasi PIN baru tidak cocok!');
+    if (data.newPassword !== data.confirmationNewPassword) {
+      throw new BadRequestException(
+        'PIN baru dan konfirmasi PIN baru tidak cocok!',
+      );
     }
 
     user.password = await hashPassword(data.newPassword);
@@ -416,7 +564,5 @@ ${clientURL}?code=${otp}`,
     });
 
     return { message: 'PIN berhasil diubah!' };
-    
   }
-
 }

@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 
 export class AddPointDto {
   @IsString()
@@ -24,9 +23,4 @@ export class CustomPointDto {
 
   @IsString()
   note: string;
-
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  expDate: Date;
 }

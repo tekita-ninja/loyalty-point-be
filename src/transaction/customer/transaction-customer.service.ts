@@ -4,7 +4,8 @@ import { EnumPointType } from 'src/common/enum/Point';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfirmTransactionCustomerDto } from './dto/transaction-customer.dto';
 import { comparePassword } from 'src/common/password';
-import { EnumTransactionLog } from 'src/common/enum/TransactionLog';
+import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
+import { EnumTransactionStatus } from 'src/common/enum/Transaction';
 
 @Injectable()
 export class TransactionCustomerService {
@@ -29,7 +30,7 @@ export class TransactionCustomerService {
   ) {
     const oldPointsAgg = await this.prismaService.customerPoint.aggregate({
       _sum: { point: true },
-      where: { AND: [{ userId: userId }, { isCancel: 0 }] },
+      where: { AND: [{ userId: userId }, { isCancel: 0 }, { isExpired: 0 }] },
     });
 
     const oldPoints = oldPointsAgg._sum.point ?? 0;
@@ -59,6 +60,10 @@ export class TransactionCustomerService {
       throw new BadRequestException('Transaction has expired');
     }
 
+    if (oldPoints < transaction.cutPoint) {
+      throw new BadRequestException('Insufficient points');
+    }
+
     const customerPoint = await this.prismaService.customerPoint.findUnique({
       where: {
         userId: userId,
@@ -76,21 +81,48 @@ export class TransactionCustomerService {
     }
 
     return this.prismaService.$transaction(async (tx) => {
+      const reward = await this.prismaService.reward.findUnique({
+        where: {
+          id: transaction.rewardId,
+        },
+        select: {
+          stocks: true,
+        },
+      });
+
+      if (!reward) {
+        throw new BadRequestException('Reward not found');
+      }
+
+      if(reward.stocks < 1) {
+        throw new BadRequestException('Reward is out of stock');
+      }
+
       const updatedTransaction = await tx.transaction.update({
         where: {
           id: data.transactionId,
         },
         data: {
-          status: 1,
+          status: EnumTransactionStatus.CONFIRMED,
         },
         select: {
           id: true,
           cutPoint: true,
+          rewardId: true,
         },
       });
 
-      const expiredDate = new Date();
-      expiredDate.setMonth(expiredDate.getMonth() + 1);
+
+      await tx.reward.update({
+        where: {
+          id: updatedTransaction.rewardId,
+        },
+        data: {
+          stocks: {
+            decrement: 1,
+          },
+        },
+      });
 
       const newCustomerPoint = await tx.customerPoint.create({
         data: {
@@ -100,7 +132,7 @@ export class TransactionCustomerService {
           note: `${transaction.note}`,
           createdBy: transaction.userId,
           type: EnumPointType.TRANSACTION,
-          expired: expiredDate,
+          isExpired: 0,
         } as Prisma.CustomerPointUncheckedCreateInput,
         include: {
           transaction: true,
@@ -111,9 +143,9 @@ export class TransactionCustomerService {
         data: {
           customerPointId: newCustomerPoint.id,
           oldPoints,
-          newPoints: oldPoints + updatedTransaction.cutPoint,
-          pointDifference: updatedTransaction.cutPoint,
-          action: EnumTransactionLog.TRANSACTION,
+          newPoints: oldPoints - updatedTransaction.cutPoint,
+          pointDifference: -updatedTransaction.cutPoint,
+          action: EnumTransactionLogAction.TRANSACTION,
         },
       });
 

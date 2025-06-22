@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTransactionDto } from './dto/transaction.dto';
 import { checkDataById } from 'src/common/utils/checkDataById';
@@ -22,7 +22,11 @@ export class TransactionService {
     });
 
     if (!reward) {
-      throw new Error('Reward not found');
+      throw new BadRequestException('Reward not found');
+    }
+
+    if(reward.stocks < 1) {
+      throw new BadRequestException('Reward is out of stock');
     }
 
     return await this.prismaService.transaction.create({
@@ -97,14 +101,14 @@ export class TransactionService {
         },
         orderBy,
         include: {
-          customerPoint:  {
+          customerPoint: {
             select: {
               id: true,
               userId: true,
               note: true,
               price: true,
               point: true,
-              expired: true,
+              isExpired: true,
               type: true,
               isCancel: true,
               user: {
@@ -118,11 +122,10 @@ export class TransactionService {
                   birthDate: true,
                   status: true,
                   ranking: true,
-                }
-              }
+                },
+              },
             },
-            
-          }
+          },
         },
       },
     );

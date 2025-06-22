@@ -3,10 +3,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { AddPointDto, CustomPointDto } from './dto/point.dto';
 import { checkDataById } from 'src/common/utils/checkDataById';
 import { EnumPointType } from 'src/common/enum/Point';
-import { EnumTransactionLog } from 'src/common/enum/TransactionLog';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { CustomerPoint, Prisma } from '@prisma/client';
+import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
 
 @Injectable()
 export class PointService {
@@ -14,6 +14,8 @@ export class PointService {
 
   async addPoint(userId: string, data: AddPointDto) {
     await checkDataById(data.userId, this.prismaService.user, 'userId');
+
+    await this.isExpiredPoints(data.userId);
 
     await checkDataById(
       data.rulePointId,
@@ -24,7 +26,9 @@ export class PointService {
     return await this.prismaService.$transaction(async (tx) => {
       const oldPointsAgg = await this.prismaService.customerPoint.aggregate({
         _sum: { point: true },
-        where: { AND: [{ userId: data.userId }, { isCancel: 0 }] },
+        where: {
+          AND: [{ userId: data.userId }, { isCancel: 0 }, { isExpired: 0 }],
+        },
       });
 
       const oldPoints = oldPointsAgg._sum.point ?? 0;
@@ -38,9 +42,6 @@ export class PointService {
         data.price * Number(rulePoint.multiplier),
       );
 
-      const expiredDate = new Date();
-      expiredDate.setMonth(expiredDate.getMonth() + 1);
-
       const customerPoint = await tx.customerPoint.create({
         data: {
           userId: data.userId,
@@ -48,7 +49,6 @@ export class PointService {
           note: data.note,
           price: data.price,
           point: calculatePoint,
-          expired: expiredDate,
           type: EnumPointType.ADD,
         },
         select: {
@@ -58,8 +58,8 @@ export class PointService {
           note: true,
           price: true,
           point: true,
-          expired: true,
           type: true,
+          isExpired: true,
           createdAt: true,
         },
       });
@@ -70,11 +70,19 @@ export class PointService {
           oldPoints,
           newPoints: oldPoints + calculatePoint,
           pointDifference: calculatePoint,
-          action: EnumTransactionLog.ADD,
+          action: EnumTransactionLogAction.ADD,
         },
       });
 
-      console.log('customerPoint', customerPoint);
+      const expiredDate = new Date();
+      expiredDate.setFullYear(expiredDate.getFullYear() + 1);
+
+      await tx.user.update({
+        where: { id: data.userId },
+        data: {
+          exprPoints: expiredDate,
+        },
+      });
 
       return customerPoint;
     });
@@ -83,10 +91,14 @@ export class PointService {
   async customPoint(userId: string, data: CustomPointDto) {
     await checkDataById(data.userId, this.prismaService.user, 'userId');
 
+    await this.isExpiredPoints(data.userId);
+
     return await this.prismaService.$transaction(async (tx) => {
       const oldPointsAgg = await this.prismaService.customerPoint.aggregate({
         _sum: { point: true },
-        where: { AND: [{ userId: data.userId }, { isCancel: 0 }] },
+        where: {
+          AND: [{ userId: data.userId }, { isCancel: 0 }, { isExpired: 0 }],
+        },
       });
 
       const oldPoints = oldPointsAgg._sum.point ?? 0;
@@ -96,7 +108,6 @@ export class PointService {
           userId: data.userId,
           note: data.note,
           point: data.point,
-          expired: data.expDate,
           type: EnumPointType.CUSTOM,
         },
         select: {
@@ -104,8 +115,8 @@ export class PointService {
           userId: true,
           note: true,
           point: true,
-          expired: true,
           type: true,
+          isExpired: true,
           createdAt: true,
         },
       });
@@ -116,7 +127,17 @@ export class PointService {
           oldPoints,
           newPoints: oldPoints + data.point,
           pointDifference: data.point,
-          action: EnumTransactionLog.CUSTOM,
+          action: EnumTransactionLogAction.CUSTOM,
+        },
+      });
+
+      const expiredDate = new Date();
+      expiredDate.setFullYear(expiredDate.getFullYear() + 1);
+
+      await tx.user.update({
+        where: { id: data.userId },
+        data: {
+          exprPoints: expiredDate,
         },
       });
 
@@ -134,7 +155,11 @@ export class PointService {
       const oldPointsAgg = await tx.customerPoint.aggregate({
         _sum: { point: true },
         where: {
-          AND: [{ userId: getUserId.userId }, { isCancel: 0 }],
+          AND: [
+            { userId: getUserId.userId },
+            { isCancel: 0 },
+            { isExpired: 0 },
+          ],
         },
       });
 
@@ -150,7 +175,6 @@ export class PointService {
           userId: true,
           note: true,
           point: true,
-          expired: true,
           type: true,
           isCancel: true,
           createdAt: true,
@@ -163,7 +187,7 @@ export class PointService {
           oldPoints,
           newPoints: oldPoints - customerPoint.point,
           pointDifference: -customerPoint.point,
-          action: EnumTransactionLog.CANCEL,
+          action: EnumTransactionLogAction.CANCEL,
         },
       });
 
@@ -226,9 +250,9 @@ export class PointService {
           note: true,
           price: true,
           point: true,
-          expired: true,
           type: true,
           isCancel: true,
+          isExpired: true,
           createdAt: true,
           createdBy: true,
           user: {
@@ -252,11 +276,49 @@ export class PointService {
               id: true,
               note: true,
               cutPoint: true,
-              expired: true,
             },
           },
         },
       },
     );
+  }
+
+  async getPointByUserId(userId: string) {
+    await this.isExpiredPoints(userId);
+    await checkDataById(userId, this.prismaService.user, 'userId');
+
+    const points = await this.prismaService.customerPoint.aggregate({
+      _sum: { point: true },
+      where: {
+        AND: [{ userId: userId }, { isCancel: 0 }, { isExpired: 0 }],
+      },
+    });
+
+    return {
+      points: points._sum.point ?? 0,
+    };
+  }
+
+  async isExpiredPoints(userId: string) {
+    return await this.prismaService.$transaction(async (tx) => {
+      const expiredDateUser = await tx.user.findUnique({
+        where: { id: userId },
+        select: { exprPoints: true },
+      });
+
+      if (expiredDateUser.exprPoints < new Date()) {
+        await tx.customerPoint.updateMany({
+          where: {
+            userId: userId,
+          },
+          data: {
+            isExpired: 1,
+          },
+        });
+        return true;
+      }
+
+      return false;
+    });
   }
 }

@@ -13,6 +13,13 @@ export class DashboardService {
         const amountUser  = await this.prismaService.user.count({
             where: {
                 status: true,
+                roles: {
+                    some: {
+                        role: {
+                            name: 'Customer'
+                        }
+                    }
+                }
             }
         })
 

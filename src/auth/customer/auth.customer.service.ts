@@ -257,13 +257,13 @@ ${clientURL}?code=${otp}`,
     }
 
     let lowestRank = await this.prismaService.ranking.findFirst({
-      where: { name: 'Bronze' },
+      where: { name: 'Silver' },
     });
 
     if (!lowestRank) {
       lowestRank = await this.prismaService.ranking.create({
         data: {
-          name: 'Bronze',
+          name: 'Silver',
           minPoints: 100,
           minSpendings: 100,
         },

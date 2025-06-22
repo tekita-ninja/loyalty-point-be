@@ -100,7 +100,7 @@ export class TransactionLogService {
               type: true,
               note: true,
               isCancel: true,
-              expired: true,
+              isExpired: true,
               user: {
                 select: {
                   id: true,

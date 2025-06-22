@@ -79,7 +79,7 @@ export class CustomerService {
             price: true,
             type: true,
             isCancel: true,
-            expired: true,
+            isExpired: true,
             transaction: {
               select: {
                 id: true,
@@ -281,7 +281,7 @@ export class CustomerService {
             price: true,
             type: true,
             isCancel: true,
-            expired: true,
+            isExpired: true,
           },
         },
       },
@@ -374,7 +374,7 @@ export class CustomerService {
             price: true,
             type: true,
             isCancel: true,
-            expired: true,
+            isExpired: true,
           },
         },
       },

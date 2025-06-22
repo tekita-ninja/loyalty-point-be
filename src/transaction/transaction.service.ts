@@ -108,7 +108,7 @@ export class TransactionService {
               note: true,
               price: true,
               point: true,
-              expired: true,
+              isExpired: true,
               type: true,
               isCancel: true,
               user: {

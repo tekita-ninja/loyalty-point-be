@@ -63,7 +63,7 @@ jobs:
       - name: Change image tag in docker-compose
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.TEKITA_STG_SSH_USER }}@${{ secrets.TEKITA_STG_REMOTE_SERVER }} "\
-            cd ~/service && \
+            cd ~/Service && \
             sed -i 's|ghcr.io/.*/loyalty-point-be:.*|ghcr.io/${{ github.repository }}:stg-${{ github.sha }}|' docker-compose.yml"
 
       - name: restart service after image change

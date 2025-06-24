@@ -21,7 +21,7 @@ export class CustomerService {
         roles: {
           some: {
             role: {
-              name: 'Customer',
+              name: 'CUSTOMER',
               code: 'CUST',
             },
           },
@@ -133,7 +133,7 @@ export class CustomerService {
         roles: {
           some: {
             role: {
-              name: 'Customer',
+              name: 'CUSTOMER',
               code: 'CUST',
             },
           },
@@ -250,6 +250,7 @@ export class CustomerService {
                 promotion: {
                   startDate: { lte: new Date() },
                   endDate: { gte: new Date() },
+                  isPush: 1,
                 },
               },
               select: {
@@ -343,6 +344,7 @@ export class CustomerService {
                 promotion: {
                   startDate: { lte: new Date() },
                   endDate: { gte: new Date() },
+                  isPush: 1,
                 },
               },
               select: {

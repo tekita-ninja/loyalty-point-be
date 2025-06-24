@@ -53,7 +53,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     TransactionModule,
     CustomerModule,
     TransactionLogModule,
-    DashboardModule
+    DashboardModule,
   ],
   controllers: [],
   providers: [],

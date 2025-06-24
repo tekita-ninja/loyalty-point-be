@@ -107,7 +107,6 @@ export class AuthService {
   }
   async signout(req: Request) {
     const authorization = req.headers.authorization;
-    console.log(authorization);
     const token = authorization.split(' ').pop();
     const decodeToken = await this.decodeToken(token);
     await this.prisma.user.update({

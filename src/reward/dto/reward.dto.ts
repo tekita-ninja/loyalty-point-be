@@ -5,7 +5,6 @@ import {
   IsArray,
   IsDate,
   IsNumber,
-  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -24,7 +23,7 @@ export class CreateRewardDto {
 
   @IsNumber()
   stocks: number;
-  
+
   @IsNumber()
   isLimited: number;
 

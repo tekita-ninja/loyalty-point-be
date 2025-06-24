@@ -77,6 +77,7 @@ export class CategoryService {
         },
         orderBy,
         select: {
+          id: true,
           name: true,
         },
       },

@@ -115,8 +115,6 @@ export class PromotionService {
       data.urlPicture = await this.fileService.getPathName(data.urlPicture);
     }
 
-    data = { ...data, isPush: 0 };
-
     const promotions = await this.prismaService.promotion.update({
       where: { id },
       data,

@@ -1,5 +1,4 @@
 export class EnumTransactionStatus {
-    static readonly PENDING = 0;
-    static readonly CONFIRMED = 1;
-
+  static readonly PENDING = 0;
+  static readonly CONFIRMED = 1;
 }

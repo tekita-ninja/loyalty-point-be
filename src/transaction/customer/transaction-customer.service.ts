@@ -94,7 +94,7 @@ export class TransactionCustomerService {
         throw new BadRequestException('Reward not found');
       }
 
-      if(reward.stocks < 1) {
+      if (reward.stocks < 1) {
         throw new BadRequestException('Reward is out of stock');
       }
 
@@ -111,7 +111,6 @@ export class TransactionCustomerService {
           rewardId: true,
         },
       });
-
 
       await tx.reward.update({
         where: {

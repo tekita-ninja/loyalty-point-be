@@ -80,6 +80,13 @@ export class CustomerService {
             type: true,
             isCancel: true,
             isExpired: true,
+            rulePoint: {
+              select: {
+                id: true,
+                isActive: true,
+                multiplier: true,
+              },
+            },
             transaction: {
               select: {
                 id: true,

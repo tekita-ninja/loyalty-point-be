@@ -7,7 +7,7 @@ import {
   UpdateRankingDto,
 } from './dto/ranking.dto';
 import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
-import { Benefit, Prisma, Promotion, Ranking } from '@prisma/client';
+import { Benefit, Prisma, Promotion, Ranking, RulePoint } from '@prisma/client';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { FileService } from 'src/common/files/files.service';
@@ -38,6 +38,11 @@ export class RankingService {
   }
 
   async create(data: CreateRankingDto) {
+    await checkDataById<RulePoint>(
+      data.rulePointId,
+      this.prismaService.rulePoint,
+      'rulePointId',
+    );
     const reward = await this.prismaService.ranking.create({
       data,
       select: {
@@ -59,7 +64,6 @@ export class RankingService {
 
   async findOne(id: string) {
     await checkDataById<Ranking>(id, this.prismaService.ranking, 'ranking');
-
     const reward = await this.prismaService.ranking.findUnique({
       where: { id },
       select: {
@@ -105,6 +109,11 @@ export class RankingService {
 
   async update(id: string, data: UpdateRankingDto) {
     await checkDataById<Ranking>(id, this.prismaService.ranking, 'ranking');
+    await checkDataById<RulePoint>(
+      data.rulePointId,
+      this.prismaService.rulePoint,
+      'rulePointId',
+    );
 
     const ranking = await this.prismaService.ranking.update({
       where: { id },
@@ -165,6 +174,12 @@ export class RankingService {
           name: true,
           minSpendings: true,
           minPoints: true,
+          rulePoint: {
+            select: {
+              id: true,
+              multiplier: true,
+            },
+          },
         },
       },
     );

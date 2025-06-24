@@ -25,7 +25,7 @@ export class TransactionService {
       throw new BadRequestException('Reward not found');
     }
 
-    if(reward.stocks < 1) {
+    if (reward.stocks < 1) {
       throw new BadRequestException('Reward is out of stock');
     }
 

@@ -19,12 +19,19 @@ export class UsersService {
   async create(createUserDto: CreateUserByAdminDto) {
     await this.isEmailUsed(createUserDto.email);
     await this.isPhoneUsed(createUserDto.phone);
-    return this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        password: await hashPassword(process.env.DEFAULT_PASSWORD),
-      },
-    });
+    try {
+      return await this.prisma.user.create({
+        data: {
+          ...createUserDto,
+          password: await hashPassword(process.env.DEFAULT_PASSWORD),
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+        throw new ConflictException('Email already exists');
+      }
+      throw error;
+    }
   }
 
   async findMany(query: QueryParamDto) {
@@ -54,6 +61,8 @@ export class UsersService {
           firstname: true,
           lastname: true,
           phone: true,
+          gender: true,
+          birthDate: true,
           email: true,
           status: true,
           roles: {
@@ -83,6 +92,9 @@ export class UsersService {
         firstname: true,
         lastname: true,
         email: true,
+        gender: true,
+        phone: true,
+        birthDate: true,
         status: true,
         roles: {
           select: {
@@ -107,6 +119,8 @@ export class UsersService {
       data: {
         firstname: body.firstname,
         lastname: body.lastname,
+        phone: body.phone,
+        email: body.email,
         gender: body.gender,
         status: body.status,
         birthDate: body.birthDate,
@@ -122,6 +136,8 @@ export class UsersService {
         email: true,
       },
     });
+
+    // console.log('result', result)
 
     if (result && id != result.id) {
       throw new ConflictException('email has been used');

@@ -52,7 +52,7 @@ export class PermissionsService {
             const fullPath = `/${controllerPath}/${methodPath}`
               .replace(/\/+/g, '/')
               .replace(/\/$/, '');
-
+            const finalPath = fullPath.replace(/^\/+/, '');
             const cleanedPath = fullPath.replace(/^\/api/, '');
 
             const codeName = `${methodString}_${cleanedPath}`.replace(
@@ -62,7 +62,7 @@ export class PermissionsService {
 
             routes.push({
               method: methodString,
-              path: fullPath,
+              path: finalPath,
               code: codeName,
               name: codeName,
             });
@@ -162,14 +162,26 @@ export class PermissionsService {
   }
   async syncPermissions() {
     const routes = this.getAllRoutes();
-    console.log(routes);
+    // console.log(routes);
     if (!routes) throw new Error('no routes');
     for (const route of routes) {
+      // console.log(route.code)
+      // console.log(route.name)
+      // console.log(route)
       await this.prisma.permission.upsert({
         where: { code: route.code },
         update: {},
         create: route,
       });
+
+      // await this.prisma.$executeRaw`TRUNCATE TABLE role_permissions RESTART IDENTITY CASCADE`;
+      // await this.prisma.$executeRaw`TRUNCATE TABLE master_permissions RESTART IDENTITY CASCADE`;
+
+      // console.log(permission.code)
+      // console.log(permission)
+
+      // console.log(permission)
+      // console.log('test')
     }
 
     const role = await this.prisma.role.findFirst({
@@ -178,6 +190,9 @@ export class PermissionsService {
       },
     });
     const permissions = await this.prisma.permission.findMany();
+    // console.log(permissions.length);
+
+    // console.log(permissions)
 
     const rolePermissions = permissions.map((permission) => {
       return {

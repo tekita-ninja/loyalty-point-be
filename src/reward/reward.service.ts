@@ -258,16 +258,16 @@ export class RewardService {
       });
     }
 
-    if (typeof query.isLimited == "number") {
+    if (typeof query.isLimited == 'number') {
       filter.push({
-        isLimited: query.isLimited
-      })
+        isLimited: query.isLimited,
+      });
     }
 
-    if(typeof query.isLowStock == "number") {
+    if (typeof query.isLowStock == 'number') {
       filter.push({
-        stocks: {lt: 10 }
-      })
+        stocks: { lt: 10 },
+      });
     }
 
     const whereStatement = filter.length > 0 ? { AND: filter } : {};

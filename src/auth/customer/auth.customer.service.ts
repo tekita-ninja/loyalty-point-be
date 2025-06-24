@@ -243,14 +243,14 @@ ${clientURL}?code=${otp}`,
 
     let roleCustomer = await this.prismaService.role.findFirst({
       where: {
-        AND: [{ name: 'Customer' }, { code: 'CUST' }],
+        AND: [{ name: 'CUSTOMER' }, { code: 'CUST' }],
       },
     });
 
     if (!roleCustomer) {
       roleCustomer = await this.prismaService.role.create({
         data: {
-          name: 'Customer',
+          name: 'CUSTOMER',
           code: 'CUST',
         },
       });
@@ -321,6 +321,7 @@ ${clientURL}?code=${otp}`,
                 promotion: {
                   startDate: { lte: new Date() },
                   endDate: { gte: new Date() },
+                  isPush: 1,
                 },
               },
               select: {
@@ -387,6 +388,7 @@ ${clientURL}?code=${otp}`,
                 promotion: {
                   startDate: { lte: new Date() },
                   endDate: { gte: new Date() },
+                  isPush: 1,
                 },
               },
               select: {

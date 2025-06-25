@@ -264,8 +264,8 @@ ${clientURL}?code=${otp}`,
       lowestRank = await this.prismaService.ranking.create({
         data: {
           name: 'Silver',
-          minPoints: 100,
-          minSpendings: 100,
+          minPoints: 20000,
+          minSpendings: 2000000,
         },
       });
     }

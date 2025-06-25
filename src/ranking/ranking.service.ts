@@ -74,6 +74,7 @@ export class RankingService {
           select: {
             benefit: {
               select: {
+                id: true,
                 title: true,
                 description: true,
               },

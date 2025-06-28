@@ -3,6 +3,13 @@ export const softDeleteModels = [
   'Role',
   'Permission',
   'Menu',
-  'TransactionLog',
+  'Transaction',
   'CustomerPoint',
+  'Reward',
+  'Location',
+  'Category',
+  'Promotion',
+  'Ranking',
+  'RulePoint',
+  'Point'
 ];

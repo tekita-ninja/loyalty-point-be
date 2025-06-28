@@ -8,7 +8,7 @@ import { Prisma, Transaction } from '@prisma/client';
 
 @Injectable()
 export class TransactionService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
 
   async create(data: CreateTransactionDto) {
     await checkDataById(data.userId, this.prismaService.user, 'userId');
@@ -31,15 +31,9 @@ export class TransactionService {
 
     return await this.prismaService.transaction.create({
       data: {
-        user: {
-          connect: { id: data.userId },
-        },
-        reward: {
-          connect: { id: data.rewardId },
-        },
-        location: {
-          connect: { id: data.locationId },
-        },
+        userId: data.userId,
+        locationId: data.locationId,
+        rewardId: data.rewardId,
         note: data.note,
         cutPoint: reward.price,
         expired: new Date(Date.now() + 15 * 60 * 1000),
@@ -52,32 +46,25 @@ export class TransactionService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
     const filter: any[] = [];
 
     if (query.locationId) {
-      await checkDataById(
-        query.locationId,
-        this.prismaService.location,
-        'locationId',
-      );
       filter.push({ locationId: query.locationId });
     }
 
     if (query.userId) {
-      await checkDataById(query.userId, this.prismaService.user, 'userId');
       filter.push({ userId: query.userId });
     }
 
+    if( query.createdBy) {
+      filter.push({ createdBy: query.createdBy });
+    }
+
     if (query.rewardId) {
-      await checkDataById(
-        query.rewardId,
-        this.prismaService.reward,
-        'rewardId',
-      );
       filter.push({ rewardId: query.rewardId });
     }
 
@@ -87,7 +74,7 @@ export class TransactionService {
 
     if (query.expired == '0') {
       filter.push({ expired: { gt: new Date() } });
-    }
+    } 
 
     if (query.expired == '1') {
       filter.push({ expired: { lt: new Date() } });
@@ -100,7 +87,72 @@ export class TransactionService {
           AND: [...filter],
         },
         orderBy,
-        include: {
+        select: {
+          id: true,
+          cutPoint: true,
+          note: true,
+          expired: true,
+          status: true,
+          createdAt: true,
+          rewardId: true,
+          createdBy: true,
+          date: true,
+          createdByUser: {
+            select: {
+              id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              phone: true,
+              gender: true,
+              birthDate: true,
+              status: true,
+              createdAt: true,
+            },
+          },
+          reward: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              urlPicture: true,
+              stocks: true,
+              startDate: true,
+              endDate: true,
+              isLimited: true,
+              category: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          location: {
+            select: {
+              id: true,
+              name: true,
+              address: true,
+              latitude: true,
+              longitude: true,
+              createdAt: true,
+              createdBy: true,
+            }
+          },
+          user: {
+            select: {
+              id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              phone: true,
+              gender: true,
+              birthDate: true,
+              status: true,
+              exprPoints: true,
+              createdAt: true,
+            }
+          },
           customerPoint: {
             select: {
               id: true,
@@ -111,22 +163,10 @@ export class TransactionService {
               isExpired: true,
               type: true,
               isCancel: true,
-              user: {
-                select: {
-                  id: true,
-                  firstname: true,
-                  lastname: true,
-                  email: true,
-                  phone: true,
-                  gender: true,
-                  birthDate: true,
-                  status: true,
-                  ranking: true,
-                },
-              },
             },
           },
-        },
+        }
+
       },
     );
   }

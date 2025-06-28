@@ -163,7 +163,7 @@ export class PromotionService {
       perPage: query.perPage,
     });
 
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 

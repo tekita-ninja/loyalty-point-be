@@ -18,7 +18,7 @@ export class RankingService {
   constructor(
     private prismaService: PrismaService,
     private fileService: FileService,
-  ) {}
+  ) { }
 
   async findAll() {
     return await this.prismaService.ranking.findMany({
@@ -31,6 +31,9 @@ export class RankingService {
           select: {
             id: true,
             multiplier: true,
+            name: true,
+            startDate: true,
+            endDate: true,
           },
         },
       },
@@ -54,6 +57,9 @@ export class RankingService {
           select: {
             id: true,
             multiplier: true,
+            name: true,
+            startDate: true,
+            endDate: true,
           },
         },
       },
@@ -100,6 +106,9 @@ export class RankingService {
           select: {
             id: true,
             multiplier: true,
+            name: true,
+            startDate: true,
+            endDate: true,
           },
         },
       },
@@ -128,6 +137,9 @@ export class RankingService {
           select: {
             id: true,
             multiplier: true,
+            name: true,
+            startDate: true,
+            endDate: true,
           },
         },
       },
@@ -158,7 +170,7 @@ export class RankingService {
       perPage: query.perPage,
     });
 
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
     const rankings = await paginate<Ranking, Prisma.RankingFindManyArgs>(
@@ -179,6 +191,9 @@ export class RankingService {
             select: {
               id: true,
               multiplier: true,
+              name: true,
+              startDate: true,
+              endDate: true,
             },
           },
         },
@@ -199,7 +214,7 @@ export class RankingService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 

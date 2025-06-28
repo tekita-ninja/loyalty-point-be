@@ -8,13 +8,16 @@ import { createPaginator } from 'prisma-pagination';
 
 @Injectable()
 export class RulePointService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
   async findAll() {
     return await this.prismaService.rulePoint.findMany({
       select: {
         id: true,
         isActive: true,
         multiplier: true,
+        name: true,
+        startDate: true,
+        endDate: true,
       },
     });
   }
@@ -37,6 +40,9 @@ export class RulePointService {
       select: {
         id: true,
         isActive: true,
+        name: true,
+        startDate: true,
+        endDate: true,
         multiplier: true,
       },
     });
@@ -53,6 +59,9 @@ export class RulePointService {
       data,
       select: {
         id: true,
+        name: true,
+        startDate: true,
+        endDate: true,
         isActive: true,
         multiplier: true,
       },
@@ -70,6 +79,9 @@ export class RulePointService {
       where: { id },
       select: {
         id: true,
+        name: true,
+        startDate: true,
+        endDate: true,
         isActive: true,
         multiplier: true,
       },
@@ -82,18 +94,52 @@ export class RulePointService {
       perPage: query.perPage,
     });
 
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
+
+    const filter: any[] = [];
+
+    if (query.isActive) {
+      filter.push({ isActive: parseInt(query.isActive) });
+    }
+
+    if (query.search) {
+      filter.push({
+        OR: [
+          { name: { contains: query.search, mode: 'insensitive' } },
+        ],
+      });
+    }
+    if (query.date) {
+      console.log('query.date', query.date);
+      filter.push({
+        startDate: {
+          lte: new Date(query.date),
+        },
+        endDate: {
+          gte: new Date(query.date),
+        },
+      });
+
+      console.log('query.date:', query.date)
+      console.log('Parsed Date:', new Date(query.date))
+
+    }
 
     return await paginate<RulePoint, Prisma.RulePointFindManyArgs>(
       this.prismaService.rulePoint,
       {
-        where: query?.isActive ? { isActive: query.isActive } : undefined,
+        where: {
+          AND: [...filter],
+        },
         orderBy,
         select: {
           id: true,
           isActive: true,
+          name: true,
+          startDate: true,
+          endDate: true,
           multiplier: true,
         },
       },

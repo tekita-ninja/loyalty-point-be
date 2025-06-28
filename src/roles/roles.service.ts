@@ -29,7 +29,7 @@ export class RolesService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
     const result = await paginate<Role, Prisma.RoleFindManyArgs>(

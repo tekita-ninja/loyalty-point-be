@@ -35,6 +35,23 @@ export class CustomerService {
         phone: true,
         createdAt: true,
         updatedAt: true,
+        ranking: {
+          select: {
+            id: true,
+            name: true,
+            minPoints: true,
+            minSpendings: true,
+            rulePoint: {
+              select: {
+                id: true,
+                multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+              },
+            },
+          },
+        }
       },
     });
   }
@@ -63,6 +80,9 @@ export class CustomerService {
               select: {
                 id: true,
                 multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
               },
             },
           },
@@ -85,6 +105,9 @@ export class CustomerService {
                 id: true,
                 isActive: true,
                 multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
               },
             },
             transaction: {
@@ -131,7 +154,7 @@ export class CustomerService {
       perPage: query.perPage,
     });
 
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
@@ -149,11 +172,6 @@ export class CustomerService {
     ];
 
     if (query.rankingId) {
-      await checkDataById(
-        query.rankingId,
-        this.prismaService.location,
-        'rankingId',
-      );
       filter.push({ rankingId: query.rankingId });
     }
 
@@ -193,6 +211,9 @@ export class CustomerService {
                 select: {
                   id: true,
                   multiplier: true,
+                  name: true,
+                  startDate: true,
+                  endDate: true,
                 },
               },
             },
@@ -250,6 +271,9 @@ export class CustomerService {
               select: {
                 id: true,
                 multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
               },
             },
             promotions: {
@@ -344,6 +368,9 @@ export class CustomerService {
               select: {
                 id: true,
                 multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
               },
             },
             promotions: {

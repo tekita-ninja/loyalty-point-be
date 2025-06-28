@@ -110,7 +110,7 @@ export class LocationService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
@@ -185,7 +185,7 @@ export class LocationService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
@@ -196,14 +196,16 @@ export class LocationService {
         },
       },
       {
-        startDate: {
-          lte: new Date(),
-        },
+        OR: [
+          { startDate: { lte: new Date() } },
+          { startDate: null },
+        ],
       },
       {
-        endDate: {
-          gte: new Date(),
-        },
+        OR: [
+          { endDate: { gte: new Date() } },
+          { endDate: null },
+        ],
       },
     ] as any[];
 

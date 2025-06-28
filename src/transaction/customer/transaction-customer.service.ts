@@ -16,11 +16,60 @@ export class TransactionCustomerService {
       where: {
         userId: customerId,
       },
-      include: {
-        user: true,
-        reward: true,
-        location: true,
-      },
+      select: {
+        id: true,
+        cutPoint: true,
+        note: true,
+        expired: true,
+        status: true,
+        createdAt: true,
+        rewardId: true,
+        createdBy: true,
+        date: true,
+        reward: {
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            urlPicture: true,
+            stocks: true,
+            startDate: true,
+            endDate: true,
+            isLimited: true,
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        location: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            latitude: true,
+            longitude: true,
+            createdAt: true,
+            createdBy: true,
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            phone: true,
+            gender: true,
+            birthDate: true,
+            status: true,
+            exprPoints: true,
+            createdAt: true,
+          }
+        }
+      }
     });
   }
 
@@ -109,6 +158,7 @@ export class TransactionCustomerService {
           id: true,
           cutPoint: true,
           rewardId: true,
+          createdBy: true,
         },
       });
 
@@ -145,6 +195,7 @@ export class TransactionCustomerService {
           newPoints: oldPoints - updatedTransaction.cutPoint,
           pointDifference: -updatedTransaction.cutPoint,
           action: EnumTransactionLogAction.TRANSACTION,
+          createdBy: updatedTransaction.createdBy,
         },
       });
 

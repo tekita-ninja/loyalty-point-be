@@ -200,7 +200,7 @@ export class PointService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
@@ -215,25 +215,14 @@ export class PointService {
     }
 
     if (query.userId) {
-      await checkDataById(query.userId, this.prismaService.user, 'userId');
       filter.push({ userId: query.userId });
     }
 
     if (query.rulePointId) {
-      await checkDataById(
-        query.rulePointId,
-        this.prismaService.rulePoint,
-        'rulePointId',
-      );
       filter.push({ rulePointId: query.rulePointId });
     }
 
     if (query.createdBy) {
-      await checkDataById(
-        query.createdBy,
-        this.prismaService.user,
-        'createdBy',
-      );
       filter.push({ createdBy: query.createdBy });
     }
 
@@ -255,6 +244,15 @@ export class PointService {
           isExpired: true,
           createdAt: true,
           createdBy: true,
+          createdByUser: {
+            select: {
+              id: true,
+              firstname: true,
+              lastname: true,
+              email: true,
+              phone: true,
+            },
+          },
           user: {
             select: {
               id: true,
@@ -269,6 +267,9 @@ export class PointService {
             select: {
               id: true,
               multiplier: true,
+              name: true,
+                startDate: true,
+                endDate: true,
             },
           },
           transaction: {
@@ -276,6 +277,35 @@ export class PointService {
               id: true,
               note: true,
               cutPoint: true,
+              reward: {
+                select: {
+                  id: true,
+                  name: true,
+                  price: true,
+                  urlPicture: true,
+                  stocks: true,
+                  startDate: true,
+                  endDate: true,
+                  isLimited: true,
+                  category: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                }
+              },
+              location: {
+                select: {
+                  id: true,
+                  name: true,
+                  address: true,
+                  latitude: true,
+                  longitude: true,
+                  createdAt: true,
+                  createdBy: true,
+                }
+              }
             },
           },
         },

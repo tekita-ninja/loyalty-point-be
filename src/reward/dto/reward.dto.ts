@@ -5,6 +5,7 @@ import {
   IsArray,
   IsDate,
   IsNumber,
+  IsOptional,
   IsString,
 } from 'class-validator';
 
@@ -27,10 +28,12 @@ export class CreateRewardDto {
   @IsNumber()
   isLimited: number;
 
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
   startDate: Date;
 
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
   endDate: Date;

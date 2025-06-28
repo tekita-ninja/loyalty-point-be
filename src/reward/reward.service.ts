@@ -173,7 +173,11 @@ export class RewardService {
 
     const reward = await this.prismaService.reward.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        startDate: data.isLimited == 1 ? data.startDate : null,
+        endDate: data.isLimited == 1 ? data.endDate : null,
+      },
       select: {
         id: true,
         name: true,
@@ -211,7 +215,7 @@ export class RewardService {
       perPage: query.perPage,
     });
 
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
 
@@ -258,13 +262,13 @@ export class RewardService {
       });
     }
 
-    if (typeof query.isLimited == 'number') {
+    if (query.isLimited == '0'|| query.isLimited == '1') {
       filter.push({
-        isLimited: query.isLimited,
+        isLimited: Number(query.isLimited),
       });
     }
 
-    if (typeof query.isLowStock == 'number') {
+    if (query.isLowStock == '1') {
       filter.push({
         stocks: { lt: 10 },
       });

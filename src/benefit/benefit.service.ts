@@ -91,7 +91,7 @@ export class BenefitService {
       page: query.page,
       perPage: query.perPage,
     });
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
     return await paginate<Benefit, Prisma.BenefitFindManyArgs>(

@@ -1,6 +1,7 @@
+import { Optional } from '@nestjs/common';
 import { PartialType } from '@nestjs/mapped-types';
-import { IsIn, IsNumber } from 'class-validator';
-import { CreateRewardDto } from 'src/reward/dto/reward.dto';
+import { Type } from 'class-transformer';
+import { IsDate, IsIn, IsNumber, IsString } from 'class-validator';
 
 export class CreateRulePointDto {
   @IsIn([0, 1], { message: 'Value must be 0 or 1' })
@@ -8,6 +9,19 @@ export class CreateRulePointDto {
 
   @IsNumber()
   multiplier: number;
+
+  @IsString()
+  name: string;
+
+  @Optional()
+  @IsDate()
+  @Type(() => Date)
+  startDate?: Date;
+
+  @Optional()
+  @IsDate()
+  @Type(() => Date)
+  endDate?: Date;
 }
 
-export class UpdateRulePointDto extends PartialType(CreateRewardDto) {}
+export class UpdateRulePointDto extends PartialType(CreateRulePointDto) { }

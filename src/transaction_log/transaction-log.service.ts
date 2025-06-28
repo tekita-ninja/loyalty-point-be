@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TransactionLogService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
 
   async search(query: QueryParamDto) {
     const paginate = createPaginator({
@@ -15,7 +15,7 @@ export class TransactionLogService {
       perPage: query.perPage,
     });
 
-    const orderField = query.sortBy || 'id';
+    const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy: Prisma.TransactionLogOrderByWithRelationInput = {
       [orderField]: orderType,
@@ -27,14 +27,6 @@ export class TransactionLogService {
       filter.push({ action: query.action });
     }
 
-    if (query.type) {
-      filter.push({
-        customerPoint: {
-          type: parseInt(query.type),
-        },
-      });
-    }
-
     if (query.userId) {
       await checkDataById(query.userId, this.prismaService.user, 'userId');
       filter.push({
@@ -42,6 +34,10 @@ export class TransactionLogService {
           userId: query.userId,
         },
       });
+    }
+
+    if(query.createdBy) {
+      filter.push({ createdBy: query.createdBy });
     }
 
     return await paginate<TransactionLog, Prisma.TransactionLogFindManyArgs>(
@@ -111,20 +107,18 @@ export class TransactionLogService {
                 },
               },
               transaction: {
-                select: {
-                  id: true,
-                  userId: true,
-                  locationId: true,
-                  rewardId: true,
-                  status: true,
-                  createdAt: true,
-                  updatedAt: true,
-                },
+                include: {
+                  reward: true,
+                  location: true,
+                }
               },
               rulePoint: {
                 select: {
                   id: true,
                   multiplier: true,
+                  name: true,
+                  startDate: true,
+                  endDate: true,
                 },
               },
             },

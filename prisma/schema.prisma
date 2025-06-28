@@ -48,9 +48,11 @@ model User {
   status       Boolean @default(true) // 1: active, 0: inactive
   exprPoints   DateTime?
 
-  transaction  Transaction[]
+  transaction  Transaction[] @relation("UserTransaction")
+  transactionCreatedBy Transaction[] @relation("CreatedByUser")
   rankingId    String?
-  customerPoints CustomerPoint[]
+  customerPoints CustomerPoint[] @relation("UserCustomerPoint")
+  customerPointsCreatedBy CustomerPoint[] @relation("CreatedByUser")
   createdTransactionLogs TransactionLog[] @relation("TransactionLogCreatedBy")
   updatedTransactionLogs TransactionLog[] @relation("TransactionLogUpdatedBy")
   deletedTransactionLogs TransactionLog[] @relation("TransactionLogDeletedBy")
@@ -402,7 +404,8 @@ model Transaction {
 
   location Location @relation(fields: [locationId], references: [id])
   reward   Reward   @relation(fields: [rewardId], references: [id])
-  user     User     @relation(fields: [userId], references: [id])
+  user           User     @relation("UserTransaction", fields: [userId], references: [id])
+  createdByUser  User?    @relation("CreatedByUser", fields: [createdBy], references: [id])
 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -418,8 +421,11 @@ model Transaction {
 
 model RulePoint {
   id          String @id @default(uuid())
+  name        String? @db.VarChar(100)
   multiplier  Decimal @db.Decimal(10,6)
   isActive    Int
+  startDate   DateTime?
+  endDate     DateTime?
   Ranking     Ranking[]
 
   customerPoints CustomerPoint[]
@@ -450,7 +456,8 @@ model CustomerPoint {
 
   transactionLogs TransactionLog[] 
 
-  user        User     @relation(fields: [userId], references: [id])
+  user           User     @relation("UserCustomerPoint", fields: [userId], references: [id])
+  createdByUser  User?    @relation("CreatedByUser", fields: [createdBy], references: [id])
   rulePoint  RulePoint? @relation(fields: [rulePointId], references: [id])
   transaction Transaction? @relation("TransactionToCustomerPoint", fields: [transactionId], references: [id])
 

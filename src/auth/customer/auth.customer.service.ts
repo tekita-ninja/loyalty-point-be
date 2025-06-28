@@ -314,6 +314,9 @@ ${clientURL}?code=${otp}`,
               select: {
                 id: true,
                 multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
               },
             },
             promotions: {
@@ -381,6 +384,9 @@ ${clientURL}?code=${otp}`,
               select: {
                 id: true,
                 multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
               },
             },
             promotions: {

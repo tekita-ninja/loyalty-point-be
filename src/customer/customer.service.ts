@@ -188,6 +188,29 @@ export class CustomerService {
                   multiplier: true,
                 },
               },
+              promotions: {
+              where: {
+                promotion: {
+                  startDate: { lte: new Date() },
+                  endDate: { gte: new Date() },
+                  isPush: 1,
+                },
+              },
+              select: {
+                promotion: {
+                  select: {
+                    id: true,
+                    title: true,
+                    subtitle: true,
+                    description: true,
+                    urlPicture: true,
+                    startDate: true,
+                    endDate: true,
+                    isPush: true,
+                  },
+                },
+              },
+            },
             },
           },
           customerPoints: {

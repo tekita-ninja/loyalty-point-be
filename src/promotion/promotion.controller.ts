@@ -21,8 +21,8 @@ export class PromotionController {
   constructor(private promotionService: PromotionService) {}
 
   @Get('all')
-  async findAll() {
-    return await this.promotionService.findAll();
+  async findAll(@Query() query: QueryParamDto) {
+    return await this.promotionService.findAll(query);
   }
 
   @Post()

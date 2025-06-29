@@ -19,8 +19,21 @@ export class RewardService {
     private fileService: FileService,
   ) {}
 
-  async findAll() {
+  async findAll(query: QueryParamDto) {
+
+    const filter = [] as any[];
+    if (query.locationId) {
+      filter.push({
+        locations: {
+          some: {
+            locationId: query.locationId,
+          },
+        },
+      });
+    }
+
     const rewards = await this.prismaService.reward.findMany({
+      where: filter.length > 0 ? { AND: filter } : {},
       select: {
         id: true,
         name: true,

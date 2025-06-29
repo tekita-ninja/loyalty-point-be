@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 
 export class CreateTransactionDto {
   @IsString()
@@ -12,4 +12,7 @@ export class CreateTransactionDto {
 
   @IsString()
   note: string;
+
+  @IsInt()
+  qty: number;
 }

@@ -277,6 +277,7 @@ export class PointService {
               id: true,
               note: true,
               cutPoint: true,
+              qty: true,
               reward: {
                 select: {
                   id: true,

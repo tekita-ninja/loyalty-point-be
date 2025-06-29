@@ -143,7 +143,7 @@ export class TransactionCustomerService {
         throw new BadRequestException('Reward not found');
       }
 
-      if (reward.stocks < 1) {
+      if (reward.stocks < transaction.qty) {
         throw new BadRequestException('Reward is out of stock');
       }
 
@@ -159,6 +159,7 @@ export class TransactionCustomerService {
           cutPoint: true,
           rewardId: true,
           createdBy: true,
+          qty: true,
         },
       });
 
@@ -168,7 +169,7 @@ export class TransactionCustomerService {
         },
         data: {
           stocks: {
-            decrement: 1,
+            decrement: updatedTransaction.qty,
           },
         },
       });

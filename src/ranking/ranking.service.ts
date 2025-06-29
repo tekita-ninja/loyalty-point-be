@@ -18,7 +18,7 @@ export class RankingService {
   constructor(
     private prismaService: PrismaService,
     private fileService: FileService,
-  ) { }
+  ) {}
 
   async findAll() {
     return await this.prismaService.ranking.findMany({

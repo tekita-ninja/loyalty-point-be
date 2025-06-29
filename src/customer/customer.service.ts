@@ -51,7 +51,7 @@ export class CustomerService {
               },
             },
           },
-        }
+        },
       },
     });
   }
@@ -217,28 +217,28 @@ export class CustomerService {
                 },
               },
               promotions: {
-              where: {
-                promotion: {
-                  startDate: { lte: new Date() },
-                  endDate: { gte: new Date() },
-                  isPush: 1,
+                where: {
+                  promotion: {
+                    startDate: { lte: new Date() },
+                    endDate: { gte: new Date() },
+                    isPush: 1,
+                  },
                 },
-              },
-              select: {
-                promotion: {
-                  select: {
-                    id: true,
-                    title: true,
-                    subtitle: true,
-                    description: true,
-                    urlPicture: true,
-                    startDate: true,
-                    endDate: true,
-                    isPush: true,
+                select: {
+                  promotion: {
+                    select: {
+                      id: true,
+                      title: true,
+                      subtitle: true,
+                      description: true,
+                      urlPicture: true,
+                      startDate: true,
+                      endDate: true,
+                      isPush: true,
+                    },
                   },
                 },
               },
-            },
             },
           },
           customerPoints: {
@@ -284,6 +284,18 @@ export class CustomerService {
         birthDate: true,
         createdAt: true,
         updatedAt: true,
+        likes: {
+          where: {
+            unlikedAt: null,
+          },
+          select: {
+            reward: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
         ranking: {
           select: {
             id: true,

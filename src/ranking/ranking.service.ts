@@ -36,6 +36,17 @@ export class RankingService {
             endDate: true,
           },
         },
+        benefits: {
+          select: {
+            benefit: {
+              select: {
+                id: true,
+                title: true,
+                description: true,
+              },
+            },
+          },
+        },
       },
     });
   }

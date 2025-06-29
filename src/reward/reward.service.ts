@@ -229,9 +229,17 @@ export class RewardService {
 
     const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
-    const orderBy = { [orderField]: orderType };
+    let orderBy = { [orderField]: orderType } as any;
 
     const filter = [] as any[];
+
+    if (query.topLikes == '1') {
+      orderBy = {
+        likes: {
+          _count: 'desc', // ✅ Benar: urut berdasarkan jumlah relasi likes
+        },
+      };
+    }
 
     if (query.startDate) {
       filter.push({

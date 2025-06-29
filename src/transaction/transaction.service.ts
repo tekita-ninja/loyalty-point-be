@@ -8,7 +8,7 @@ import { Prisma, Transaction } from '@prisma/client';
 
 @Injectable()
 export class TransactionService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
   async create(data: CreateTransactionDto) {
     await checkDataById(data.userId, this.prismaService.user, 'userId');
@@ -60,7 +60,7 @@ export class TransactionService {
       filter.push({ userId: query.userId });
     }
 
-    if( query.createdBy) {
+    if (query.createdBy) {
       filter.push({ createdBy: query.createdBy });
     }
 
@@ -74,7 +74,7 @@ export class TransactionService {
 
     if (query.expired == '0') {
       filter.push({ expired: { gt: new Date() } });
-    } 
+    }
 
     if (query.expired == '1') {
       filter.push({ expired: { lt: new Date() } });
@@ -137,7 +137,7 @@ export class TransactionService {
               longitude: true,
               createdAt: true,
               createdBy: true,
-            }
+            },
           },
           user: {
             select: {
@@ -151,7 +151,7 @@ export class TransactionService {
               status: true,
               exprPoints: true,
               createdAt: true,
-            }
+            },
           },
           customerPoint: {
             select: {
@@ -165,8 +165,7 @@ export class TransactionService {
               isCancel: true,
             },
           },
-        }
-
+        },
       },
     );
   }

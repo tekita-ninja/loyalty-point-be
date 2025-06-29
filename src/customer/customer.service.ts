@@ -13,7 +13,7 @@ export class CustomerService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly pointService: PointService, // Assuming you have a PointService for handling points
-  ) { }
+  ) {}
 
   async findAll() {
     return await this.prismaService.user.findMany({
@@ -51,7 +51,7 @@ export class CustomerService {
               },
             },
           },
-        }
+        },
       },
     });
   }
@@ -285,16 +285,16 @@ export class CustomerService {
         createdAt: true,
         updatedAt: true,
         likes: {
-          where: { 
-               unlikedAt: null
+          where: {
+            unlikedAt: null,
           },
           select: {
             reward: {
               select: {
                 id: true,
-              }
+              },
             },
-          }
+          },
         },
         ranking: {
           select: {
@@ -364,11 +364,11 @@ export class CustomerService {
       ...resultWithTotalPoint,
       ranking: resultWithTotalPoint.ranking
         ? {
-          ...resultWithTotalPoint.ranking,
-          promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
-            transformUrlPicture(promo.promotion),
-          ),
-        }
+            ...resultWithTotalPoint.ranking,
+            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+              transformUrlPicture(promo.promotion),
+            ),
+          }
         : null,
     };
 
@@ -460,11 +460,11 @@ export class CustomerService {
       ...resultWithTotalPoint,
       ranking: resultWithTotalPoint.ranking
         ? {
-          ...resultWithTotalPoint.ranking,
-          promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
-            transformUrlPicture(promo.promotion),
-          ),
-        }
+            ...resultWithTotalPoint.ranking,
+            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+              transformUrlPicture(promo.promotion),
+            ),
+          }
         : null,
     };
 

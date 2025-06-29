@@ -268,8 +268,8 @@ export class PointService {
               id: true,
               multiplier: true,
               name: true,
-                startDate: true,
-                endDate: true,
+              startDate: true,
+              endDate: true,
             },
           },
           transaction: {
@@ -293,7 +293,7 @@ export class PointService {
                       name: true,
                     },
                   },
-                }
+                },
               },
               location: {
                 select: {
@@ -304,8 +304,8 @@ export class PointService {
                   longitude: true,
                   createdAt: true,
                   createdBy: true,
-                }
-              }
+                },
+              },
             },
           },
         },

@@ -11,5 +11,5 @@ export const softDeleteModels = [
   'Promotion',
   'Ranking',
   'RulePoint',
-  'Point'
+  'Point',
 ];

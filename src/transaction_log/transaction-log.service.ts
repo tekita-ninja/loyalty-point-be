@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TransactionLogService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
 
   async search(query: QueryParamDto) {
     const paginate = createPaginator({
@@ -36,7 +36,7 @@ export class TransactionLogService {
       });
     }
 
-    if(query.createdBy) {
+    if (query.createdBy) {
       filter.push({ createdBy: query.createdBy });
     }
 
@@ -110,7 +110,7 @@ export class TransactionLogService {
                 include: {
                   reward: true,
                   location: true,
-                }
+                },
               },
               rulePoint: {
                 select: {

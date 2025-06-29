@@ -196,16 +196,10 @@ export class LocationService {
         },
       },
       {
-        OR: [
-          { startDate: { lte: new Date() } },
-          { startDate: null },
-        ],
+        OR: [{ startDate: { lte: new Date() } }, { startDate: null }],
       },
       {
-        OR: [
-          { endDate: { gte: new Date() } },
-          { endDate: null },
-        ],
+        OR: [{ endDate: { gte: new Date() } }, { endDate: null }],
       },
     ] as any[];
 

@@ -13,7 +13,7 @@ export class CustomerService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly pointService: PointService, // Assuming you have a PointService for handling points
-  ) {}
+  ) { }
 
   async findAll() {
     return await this.prismaService.user.findMany({
@@ -217,28 +217,28 @@ export class CustomerService {
                 },
               },
               promotions: {
-              where: {
-                promotion: {
-                  startDate: { lte: new Date() },
-                  endDate: { gte: new Date() },
-                  isPush: 1,
+                where: {
+                  promotion: {
+                    startDate: { lte: new Date() },
+                    endDate: { gte: new Date() },
+                    isPush: 1,
+                  },
                 },
-              },
-              select: {
-                promotion: {
-                  select: {
-                    id: true,
-                    title: true,
-                    subtitle: true,
-                    description: true,
-                    urlPicture: true,
-                    startDate: true,
-                    endDate: true,
-                    isPush: true,
+                select: {
+                  promotion: {
+                    select: {
+                      id: true,
+                      title: true,
+                      subtitle: true,
+                      description: true,
+                      urlPicture: true,
+                      startDate: true,
+                      endDate: true,
+                      isPush: true,
+                    },
                   },
                 },
               },
-            },
             },
           },
           customerPoints: {
@@ -284,6 +284,18 @@ export class CustomerService {
         birthDate: true,
         createdAt: true,
         updatedAt: true,
+        likes: {
+          where: { 
+               unlikedAt: null
+          },
+          select: {
+            reward: {
+              select: {
+                id: true,
+              }
+            },
+          }
+        },
         ranking: {
           select: {
             id: true,
@@ -352,11 +364,11 @@ export class CustomerService {
       ...resultWithTotalPoint,
       ranking: resultWithTotalPoint.ranking
         ? {
-            ...resultWithTotalPoint.ranking,
-            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
-              transformUrlPicture(promo.promotion),
-            ),
-          }
+          ...resultWithTotalPoint.ranking,
+          promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+            transformUrlPicture(promo.promotion),
+          ),
+        }
         : null,
     };
 
@@ -448,11 +460,11 @@ export class CustomerService {
       ...resultWithTotalPoint,
       ranking: resultWithTotalPoint.ranking
         ? {
-            ...resultWithTotalPoint.ranking,
-            promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
-              transformUrlPicture(promo.promotion),
-            ),
-          }
+          ...resultWithTotalPoint.ranking,
+          promotions: resultWithTotalPoint.ranking.promotions.map((promo) =>
+            transformUrlPicture(promo.promotion),
+          ),
+        }
         : null,
     };
 

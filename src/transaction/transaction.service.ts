@@ -17,6 +17,7 @@ export class TransactionService {
       this.prismaService.location,
       'locationId',
     );
+
     const reward = await this.prismaService.reward.findUnique({
       where: { id: data.rewardId },
     });
@@ -25,8 +26,25 @@ export class TransactionService {
       throw new BadRequestException('Reward not found');
     }
 
-    if (reward.stocks < 1) {
+    if (data.qty < 1) {
+      throw new BadRequestException('Quantity must be at least 1');
+    }
+
+    if (reward.stocks < data.qty) {
       throw new BadRequestException('Reward is out of stock');
+    }
+
+    const oldPointsAgg = await this.prismaService.customerPoint.aggregate({
+      _sum: { point: true },
+      where: {
+        AND: [{ userId: data.userId }, { isCancel: 0 }, { isExpired: 0 }],
+      },
+    });
+
+    const oldPoints = oldPointsAgg._sum.point ?? 0;
+
+    if (oldPoints < data.qty * reward.price) {
+      throw new BadRequestException('Insufficient points');
     }
 
     return await this.prismaService.transaction.create({
@@ -35,7 +53,8 @@ export class TransactionService {
         locationId: data.locationId,
         rewardId: data.rewardId,
         note: data.note,
-        cutPoint: reward.price,
+        cutPoint: reward.price * data.qty,
+        qty: data.qty,
         expired: new Date(Date.now() + 15 * 60 * 1000),
       },
     });
@@ -96,6 +115,7 @@ export class TransactionService {
           createdAt: true,
           rewardId: true,
           createdBy: true,
+          qty: true,
           date: true,
           createdByUser: {
             select: {

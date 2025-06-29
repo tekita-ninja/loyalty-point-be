@@ -6,18 +6,26 @@ export class DashboardService {
   constructor(private prismaService: PrismaService) {}
 
   async getOverview() {
-    const amountUser = await this.prismaService.user.count({
+    const amountCustomer = await this.prismaService.user.count({
       where: {
-        status: true,
         roles: {
           some: {
             role: {
-              name: 'Customer',
+              name: 'CUSTOMER',
             },
           },
         },
       },
     });
+
+    const amountUser = await this.prismaService.user.count({
+      where: {
+        status: true,
+      },
+    });
+
+    console.log('amountCustomer', amountCustomer);
+    console.log('amountUser', amountUser);
 
     const topRewardsRaw = await this.prismaService.like.groupBy({
       by: ['rewardId'],
@@ -68,6 +76,7 @@ export class DashboardService {
     });
 
     return {
+      amountCustomer,
       amountUser,
       topRewards: topRewardsWithLikeTotal,
     };

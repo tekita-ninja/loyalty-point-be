@@ -31,8 +31,8 @@ export class RewardController {
   }
 
   @Get('all')
-  async findAll() {
-    return await this.rewardService.findAll();
+  async findAll(@Query() query: QueryParamDto) {
+    return await this.rewardService.findAll(query);
   }
 
   @Get(':id')

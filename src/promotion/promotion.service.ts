@@ -19,8 +19,20 @@ export class PromotionService {
     private fileService: FileService,
   ) {}
 
-  async findAll() {
+  async findAll(query: QueryParamDto) {
+    const filter = [];
+
+    if (query.rankingId) {
+      filter.push({
+        rankings: {
+          some: {
+            rankingId: query.rankingId,
+          },
+        },
+      });
+    }
     const promotion = await this.prismaService.promotion.findMany({
+      where: filter.length > 0 ? { AND: filter } : {},
       select: {
         id: true,
         title: true,

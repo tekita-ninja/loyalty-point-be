@@ -24,4 +24,4 @@ export class CreateRulePointDto {
   endDate?: Date;
 }
 
-export class UpdateRulePointDto extends PartialType(CreateRulePointDto) { }
+export class UpdateRulePointDto extends PartialType(CreateRulePointDto) {}

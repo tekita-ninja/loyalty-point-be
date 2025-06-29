@@ -53,7 +53,7 @@ export class TransactionCustomerService {
             longitude: true,
             createdAt: true,
             createdBy: true,
-          }
+          },
         },
         user: {
           select: {
@@ -67,9 +67,9 @@ export class TransactionCustomerService {
             status: true,
             exprPoints: true,
             createdAt: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
   }
 

@@ -8,7 +8,7 @@ import { createPaginator } from 'prisma-pagination';
 
 @Injectable()
 export class RulePointService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
   async findAll() {
     return await this.prismaService.rulePoint.findMany({
       select: {
@@ -106,9 +106,7 @@ export class RulePointService {
 
     if (query.search) {
       filter.push({
-        OR: [
-          { name: { contains: query.search, mode: 'insensitive' } },
-        ],
+        OR: [{ name: { contains: query.search, mode: 'insensitive' } }],
       });
     }
     if (query.date) {
@@ -122,9 +120,8 @@ export class RulePointService {
         },
       });
 
-      console.log('query.date:', query.date)
-      console.log('Parsed Date:', new Date(query.date))
-
+      console.log('query.date:', query.date);
+      console.log('Parsed Date:', new Date(query.date));
     }
 
     return await paginate<RulePoint, Prisma.RulePointFindManyArgs>(

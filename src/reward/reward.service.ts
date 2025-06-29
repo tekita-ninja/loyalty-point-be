@@ -20,7 +20,6 @@ export class RewardService {
   ) {}
 
   async findAll(query: QueryParamDto) {
-
     const filter = [] as any[];
     if (query.locationId) {
       filter.push({
@@ -275,7 +274,7 @@ export class RewardService {
       });
     }
 
-    if (query.isLimited == '0'|| query.isLimited == '1') {
+    if (query.isLimited == '0' || query.isLimited == '1') {
       filter.push({
         isLimited: Number(query.isLimited),
       });

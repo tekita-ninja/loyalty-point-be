@@ -46,7 +46,7 @@ export class LocationService {
 
   async findOne(id: string) {
     await checkDataById<Location>(id, this.prismaService.location, 'location');
-    return await this.prismaService.location.findUnique({
+    const location = await this.prismaService.location.findUnique({
       where: { id },
       select: {
         id: true,
@@ -74,6 +74,8 @@ export class LocationService {
         },
       },
     });
+
+    return transformUrlPicture(location)
   }
 
   async update(id: string, data: UpdateLocationDto) {

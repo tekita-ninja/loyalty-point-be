@@ -1,25 +1,25 @@
-export function transformUrlPicture(items: any) {
+export function transformUrlPicture(item: any): any {
   const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
 
-  const transformUrl = (item: any) => ({
-    ...item,
-    urlPicture: `${baseUrl}${item.urlPicture}`,
-  });
-
-  if (Array.isArray(items)) {
-    return items.map(transformUrl);
+  if (item instanceof Date) {
+    return item.toISOString(); // atau biarkan return item;
   }
 
-  if (items && Array.isArray(items.data)) {
-    return {
-      ...items,
-      data: items.data.map(transformUrl),
-    };
+  if (Array.isArray(item)) {
+    return item.map(transformUrlPicture);
   }
 
-  if (typeof items === 'object' && items !== null) {
-    return transformUrl(items);
+  if (item !== null && typeof item === 'object') {
+    const result: any = {};
+    for (const key in item) {
+      if (key === 'urlPicture' && typeof item[key] === 'string') {
+        result[key] = `${baseUrl}${item[key]}`;
+      } else {
+        result[key] = transformUrlPicture(item[key]);
+      }
+    }
+    return result;
   }
 
-  return items;
+  return item;
 }

@@ -142,10 +142,10 @@ export class CustomerService {
     const totalPoint =
       result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0;
 
-    return {
+    return transformUrlPicture({
       ...result,
       totalPoint,
-    };
+    });
   }
 
   async search(query: QueryParamDto) {
@@ -261,10 +261,10 @@ export class CustomerService {
       return { ...user, totalPoint };
     });
 
-    return {
+    return transformUrlPicture({
       ...result,
       data: withTotalPoint,
-    };
+    });
   }
 
   async findProfile(customerId: string) {

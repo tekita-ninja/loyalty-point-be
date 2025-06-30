@@ -1,5 +1,6 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class DashboardService {
@@ -75,11 +76,11 @@ export class DashboardService {
       };
     });
 
-    return {
+    return transformUrlPicture({
       amountCustomer,
       amountUser,
       topRewards: topRewardsWithLikeTotal,
-    };
+    });
   }
 
   async getNotification() {

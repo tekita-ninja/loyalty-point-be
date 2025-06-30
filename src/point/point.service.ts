@@ -7,6 +7,7 @@ import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
 import { CustomerPoint, Prisma } from '@prisma/client';
 import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class PointService {
@@ -226,7 +227,7 @@ export class PointService {
       filter.push({ createdBy: query.createdBy });
     }
 
-    return await paginate<CustomerPoint, Prisma.CustomerPointFindManyArgs>(
+    const points = await paginate<CustomerPoint, Prisma.CustomerPointFindManyArgs>(
       this.prismaService.customerPoint,
       {
         where: {
@@ -312,6 +313,8 @@ export class PointService {
         },
       },
     );
+
+    return transformUrlPicture(points);
   }
 
   async getPointByUserId(userId: string) {

@@ -6,13 +6,14 @@ import { ConfirmTransactionCustomerDto } from './dto/transaction-customer.dto';
 import { comparePassword } from 'src/common/password';
 import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
 import { EnumTransactionStatus } from 'src/common/enum/Transaction';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class TransactionCustomerService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getCustomerTransactions(customerId: string) {
-    return await this.prismaService.transaction.findMany({
+    const transactionCustomer = await this.prismaService.transaction.findMany({
       where: {
         userId: customerId,
       },
@@ -71,7 +72,11 @@ export class TransactionCustomerService {
         },
       },
     });
+    
+    return transformUrlPicture(transactionCustomer);
+
   }
+  
 
   async confirmTransaction(
     userId: string,

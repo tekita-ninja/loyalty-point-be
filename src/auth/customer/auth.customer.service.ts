@@ -107,9 +107,12 @@ export class AuthCustomerService {
   async sendOtpToWhatsapp(otp: string, target: string) {
     const clientURL = process.env.CLIENT_URL || 'https://jos.com';
     const body = {
-      message: `Klik link ini untuk verifikasi nomor telepon dan melanjutkan pendaftaran akun di Elite Eight:
-            
-${clientURL}?code=${otp}`,
+      message: `Klik link ini untuk verifikasi nomor telepon atau masukkan kode verifikasi untuk melanjutkan pendaftaran akun di Elite Eight:
+
+Link Verifikasi: ${clientURL}/verify-top?code=${otp} 
+
+Kode verifikasi: ${otp}
+`,
       target,
     };
 

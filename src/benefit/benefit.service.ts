@@ -9,35 +9,55 @@ import { Benefit, Prisma, Ranking } from '@prisma/client';
 import { checkDataById, checkDataByIds } from 'src/common/utils/checkDataById';
 import { QueryParamDto } from 'src/common/pagination/dto/pagination.dto';
 import { createPaginator } from 'prisma-pagination';
+import { FileService } from 'src/common/files/files.service';
+import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 
 @Injectable()
 export class BenefitService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private fileService: FileService
+  ) {}
+  
 
   async findAll() {
-    return await this.prismaService.benefit.findMany({
+    const benefits = await this.prismaService.benefit.findMany({
       select: {
         id: true,
         title: true,
         description: true,
+        urlPicture: true,
       },
     });
+
+    return transformUrlPicture(benefits)
   }
 
   async create(data: CreateBenefitDto) {
-    return await this.prismaService.benefit.create({
+    if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
+      data.urlPicture = await this.fileService.copyFileFromTemp(
+        data.urlPicture,
+      );
+    } else {
+      data.urlPicture = await this.fileService.getPathName(data.urlPicture);
+    }
+
+    const benefit = await this.prismaService.benefit.create({
       data,
       select: {
         id: true,
         title: true,
         description: true,
+        urlPicture: true,
       },
     });
+
+    return transformUrlPicture(benefit);
   }
 
   async findOne(id: string) {
     await checkDataById<Benefit>(id, this.prismaService.benefit, 'benefit');
-    return await this.prismaService.benefit.findUnique({
+    const benefit =  await this.prismaService.benefit.findUnique({
       where: {
         id,
       },
@@ -45,6 +65,7 @@ export class BenefitService {
         id: true,
         title: true,
         description: true,
+        urlPicture: true,
         rankings: {
           select: {
             ranking: {
@@ -58,32 +79,50 @@ export class BenefitService {
         },
       },
     });
+
+    return transformUrlPicture(benefit);
+
   }
 
   async update(id: string, data: UpdateBenefitDto) {
     await checkDataById<Benefit>(id, this.prismaService.benefit, 'benefit');
+     if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
+      data.urlPicture = await this.fileService.copyFileFromTemp(
+        data.urlPicture,
+      );
+    } else {
+      data.urlPicture = await this.fileService.getPathName(data.urlPicture);
+    }
 
-    return await this.prismaService.benefit.update({
+    const benefit = await this.prismaService.benefit.update({
       where: { id },
       data,
       select: {
         id: true,
         title: true,
         description: true,
+        urlPicture: true,
       },
     });
+
+    return transformUrlPicture(benefit);
+
   }
 
   async delete(id: string) {
     await checkDataById<Benefit>(id, this.prismaService.benefit, 'benefit');
-    return await this.prismaService.benefit.delete({
+    const benefit = await this.prismaService.benefit.delete({
       where: { id },
       select: {
         id: true,
         title: true,
         description: true,
+        urlPicture: true,
       },
     });
+
+    return transformUrlPicture(benefit);
+
   }
 
   async search(query: QueryParamDto) {
@@ -94,7 +133,7 @@ export class BenefitService {
     const orderField = query.sortBy || 'createdAt';
     const orderType = query.sortType || 'desc';
     const orderBy = { [orderField]: orderType };
-    return await paginate<Benefit, Prisma.BenefitFindManyArgs>(
+    const benefits = await paginate<Benefit, Prisma.BenefitFindManyArgs>(
       this.prismaService.benefit,
       {
         where: {
@@ -107,9 +146,12 @@ export class BenefitService {
           id: true,
           title: true,
           description: true,
+          urlPicture: true,
         },
       },
     );
+
+    return transformUrlPicture(benefits);
   }
 
   async replaceBenefitRankings(data: ReplaceBenefitRankingsDto) {

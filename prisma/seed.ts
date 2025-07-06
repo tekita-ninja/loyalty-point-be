@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 // import { INestApplication } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { permissionData } from '../data/permissions';
+import { create } from 'domain';
 const prisma = new PrismaClient();
 async function createRole() {
   const existing = await prisma.role.findFirst({ where: { code: 'SUPER' } });
@@ -169,7 +170,8 @@ async function createMenuMenuManagement(roleId: string, parentId: string) {
     },
   });
 }
-async function main() {
+
+async function createAuthenticationAuthorization() {
   const role = await createRole();
   const user = await createUser();
   const userRole = await createUserRole(user.id, role.id);
@@ -210,6 +212,13 @@ async function main() {
     roleMenus,
   });
   console.log('✅ Seeding complete.');
+}
+
+async function main() {
+  await createAuthenticationAuthorization();
+
+
+  
 }
 
 main()

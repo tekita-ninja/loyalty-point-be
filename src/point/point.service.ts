@@ -8,6 +8,7 @@ import { createPaginator } from 'prisma-pagination';
 import { CustomerPoint, Prisma } from '@prisma/client';
 import { EnumTransactionLogAction } from 'src/common/enum/TransactionLog';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
+import { checkRankingUser } from 'src/common/utils/checkRankingUser';
 
 @Injectable()
 export class PointService {
@@ -85,6 +86,8 @@ export class PointService {
         },
       });
 
+      await checkRankingUser(data.userId, this.prismaService);
+
       return customerPoint;
     });
   }
@@ -146,7 +149,7 @@ export class PointService {
     });
   }
 
-  async cancelPoint(customerPointId: string) {
+  async cancelPoint(userId: string, customerPointId: string) {
     const getUserId = await this.prismaService.customerPoint.findUnique({
       where: { id: customerPointId },
       select: { userId: true },
@@ -189,8 +192,11 @@ export class PointService {
           newPoints: oldPoints - customerPoint.point,
           pointDifference: -customerPoint.point,
           action: EnumTransactionLogAction.CANCEL,
+          createdBy: userId,
         },
       });
+
+      await checkRankingUser(getUserId.userId, this.prismaService);
 
       return customerPoint;
     });

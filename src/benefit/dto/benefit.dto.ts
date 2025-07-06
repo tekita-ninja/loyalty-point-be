@@ -7,6 +7,9 @@ export class CreateBenefitDto {
 
   @IsString()
   description: string;
+
+  @IsString()
+  urlPicture: string;
 }
 
 export class ReplaceBenefitRankingsDto {

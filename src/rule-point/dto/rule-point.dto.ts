@@ -1,7 +1,7 @@
 import { Optional } from '@nestjs/common';
 import { PartialType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsDate, IsIn, IsNumber, IsString } from 'class-validator';
+import { IsDate, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateRulePointDto {
   @IsIn([0, 1], { message: 'Value must be 0 or 1' })
@@ -13,12 +13,12 @@ export class CreateRulePointDto {
   @IsString()
   name: string;
 
-  @Optional()
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
   startDate?: Date;
 
-  @Optional()
+  @IsOptional()
   @IsDate()
   @Type(() => Date)
   endDate?: Date;

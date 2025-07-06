@@ -105,11 +105,11 @@ export class AuthCustomerService {
   }
 
   async sendOtpToWhatsapp(otp: string, target: string) {
-    const clientURL = process.env.CLIENT_URL || 'https://jos.com';
+    const clientURL = `${process.env.CLIENT_URL}/verify-otp` || 'https://jos.com';
     const body = {
       message: `Klik link ini untuk verifikasi nomor telepon atau masukkan kode verifikasi untuk melanjutkan pendaftaran akun di Elite Eight:
 
-Link Verifikasi: ${clientURL}/verify-top?code=${otp} 
+Link Verifikasi: ${clientURL}?code=${otp} 
 
 Kode verifikasi: ${otp}
 `,
@@ -520,6 +520,8 @@ Kode verifikasi: ${otp}
       ...result,
       totalPoint:
         result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+      totalSpendings: 
+      result.customerPoints?.reduce((cum,cp) => cum + Number(cp.price), 0) || 0,
     };
 
     const transformedResult = {

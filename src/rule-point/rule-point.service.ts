@@ -8,7 +8,7 @@ import { createPaginator } from 'prisma-pagination';
 
 @Injectable()
 export class RulePointService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private prismaService: PrismaService) { }
   async findAll() {
     return await this.prismaService.rulePoint.findMany({
       select: {
@@ -53,6 +53,10 @@ export class RulePointService {
       this.prismaService.rulePoint,
       'rule point',
     );
+    if(!data.startDate || !data.endDate) {
+      data.startDate = null;
+      data.endDate = null;
+    }
 
     return await this.prismaService.rulePoint.update({
       where: { id },
@@ -110,7 +114,6 @@ export class RulePointService {
       });
     }
     if (query.date) {
-      console.log('query.date', query.date);
       filter.push({
         startDate: {
           lte: new Date(query.date),
@@ -119,9 +122,6 @@ export class RulePointService {
           gte: new Date(query.date),
         },
       });
-
-      console.log('query.date:', query.date);
-      console.log('Parsed Date:', new Date(query.date));
     }
 
     return await paginate<RulePoint, Prisma.RulePointFindManyArgs>(
@@ -161,4 +161,103 @@ export class RulePointService {
       },
     });
   }
-}
+
+  async findOptions(customerId: string, query: QueryParamDto) {
+    await checkDataById(customerId, this.prismaService.user, 'customer');
+
+    const customer = await this.prismaService.user.findUnique({
+      where: { id: customerId },
+      select: {
+        id: true,
+        firstname: true,
+        lastname: true,
+        email: true,
+        phone: true,
+        ranking: {
+          select: {
+            id: true,
+            name: true,
+            minPoints: true,
+            minSpendings: true,
+            rulePoint: {
+              select: {
+                id: true,
+                multiplier: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const paginate = createPaginator({
+      page: query.page,
+      perPage: query.perPage,
+    });
+
+    const orderField = query.sortBy || 'createdAt';
+    const orderType = query.sortType || 'desc';
+    const orderBy = { [orderField]: orderType };
+
+    const filter: any[] = [];
+
+    if (query.isActive) {
+      filter.push({ isActive: parseInt(query.isActive) });
+    }
+
+    if (query.search) {
+      filter.push({
+        OR: [{ name: { contains: query.search, mode: 'insensitive' } }],
+      });
+    }
+
+    if (customer.ranking?.rulePoint?.id || query.date) {
+      const orConditions: any[] = [];
+
+      if (customer.ranking?.rulePoint?.id) {
+        orConditions.push({
+          AND: [
+            { id: customer.ranking.rulePoint.id },
+            { startDate: null },
+            { endDate: null }
+          ]
+        });
+      }
+
+      if (query.date) {
+        const date = new Date(query.date);
+        orConditions.push({
+          startDate: { lte: date },
+          endDate: { gte: date },
+        });
+      }
+
+      console.log(customer.ranking?.rulePoint?.id);
+
+      filter.push({ OR: orConditions });
+
+    }
+
+      return await paginate<RulePoint, Prisma.RulePointFindManyArgs>(
+        this.prismaService.rulePoint,
+        {
+          where: {
+            AND: [...filter],
+          },
+          orderBy,
+          select: {
+            id: true,
+            isActive: true,
+            name: true,
+            startDate: true,
+            endDate: true,
+            multiplier: true,
+          },
+        },
+      );
+    }
+
+  }

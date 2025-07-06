@@ -17,6 +17,9 @@ export class TransactionCustomerService {
       where: {
         userId: customerId,
       },
+      orderBy: {
+        createdAt: 'desc'
+      },
       select: {
         id: true,
         cutPoint: true,

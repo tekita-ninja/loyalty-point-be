@@ -32,8 +32,8 @@ export class PointController {
 
   @Post('cancel/:customerPointId')
   @UseGuards(AuthGuard('jwt'), PermissionGuard)
-  async cancelPoint(@Param('customerPointId') customerPointId: string) {
-    return await this.pointService.cancelPoint(customerPointId);
+  async cancelPoint(@Request() req: any, @Param('customerPointId') customerPointId: string) {
+    return await this.pointService.cancelPoint(req.user.jwtUserId, customerPointId);
   }
 
   @Get()

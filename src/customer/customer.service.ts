@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CustomerUpdateProfileDto } from './dto/customer.dto';
 import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 import { PointService } from 'src/point/point.service';
+import { checkRankingUser } from 'src/common/utils/checkRankingUser';
 
 @Injectable()
 export class CustomerService {
@@ -142,9 +143,13 @@ export class CustomerService {
     const totalPoint =
       result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0;
 
+    const totalSpendings = 
+      result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) || 0;
+
     return transformUrlPicture({
       ...result,
       totalPoint,
+      totalSpendings,
     });
   }
 
@@ -247,6 +252,7 @@ export class CustomerService {
             },
             select: {
               point: true,
+              price: true
             },
           },
         },
@@ -258,7 +264,11 @@ export class CustomerService {
         (sum, cp) => sum + cp.point,
         0,
       );
-      return { ...user, totalPoint };
+      const totalSpendings = user?.customerPoints.reduce(
+        (cum, cp) => cum + Number(cp.price),
+        0,
+      );
+      return { ...user, totalPoint, totalSpendings };
     });
 
     return transformUrlPicture({
@@ -271,6 +281,9 @@ export class CustomerService {
     await this.pointService.isExpiredPoints(customerId); // Check and update expired points
 
     await checkDataById(customerId, this.prismaService.user, 'customerId');
+
+    await checkRankingUser(customerId, this.prismaService);
+
     const result = await this.prismaService.user.findUnique({
       where: {
         id: customerId,
@@ -358,6 +371,8 @@ export class CustomerService {
       ...result,
       totalPoint:
         result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+      totalSpendings:
+        result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) || 0,
     };
 
     const transformedResult = {
@@ -454,6 +469,8 @@ export class CustomerService {
       ...result,
       totalPoint:
         result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
+      totalSpendings:
+        result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) || 0,
     };
 
     const transformedResult = {

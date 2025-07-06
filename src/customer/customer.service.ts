@@ -252,6 +252,7 @@ export class CustomerService {
             },
             select: {
               point: true,
+              price: true
             },
           },
         },

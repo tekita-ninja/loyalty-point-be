@@ -242,6 +242,7 @@ model Benefit {
   id                String @id @default(uuid())
   title             String @db.VarChar(100)
   description       String @db.Text
+  urlPicture        String? @db.VarChar(255)
 
   rankings     RankingBenefit[]
 

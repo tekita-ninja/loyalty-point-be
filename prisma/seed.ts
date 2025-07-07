@@ -3,7 +3,14 @@ import { PrismaClient } from '@prisma/client';
 // import { INestApplication } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { permissionData } from '../data/permissions';
-import { create } from 'domain';
+import { createBenefits } from './seeder/ranking/benefit';
+import { createPromotions } from './seeder/ranking/promotions';
+import { createRulePoints } from './seeder/ranking/rule-point';
+import { createRankings } from './seeder/ranking/ranking';
+import { createRewards } from './seeder/reward/reward';
+import { createLocations } from './seeder/reward/location';
+import { createRoleMenus, dataMenus, insertMenuWithChildren } from './seeder/menu-seed';
+import { createCustomers } from './seeder/customer/customer';
 const prisma = new PrismaClient();
 async function createRole() {
   const existing = await prisma.role.findFirst({ where: { code: 'SUPER' } });
@@ -53,72 +60,7 @@ async function createPermissions() {
 async function getPermissions() {
   return prisma.permission.findMany();
 }
-async function createRoleHeaderMenu() {
-  const existing = await prisma.menu.findFirst({ where: { title: 'Super', isGroup: true } });
-  if (existing) return existing;
 
-  return prisma.menu.create({
-    data: {
-      title: 'Super',
-      isGroup: true,
-    },
-  });
-}
-
-async function createMenuRole(headerMenu: string) {
-  const existing = await prisma.menu.findFirst({
-    where: { title: 'Roles', parentId: headerMenu },
-  });
-  if (existing) return existing;
-
-  return prisma.menu.create({
-    data: {
-      title: 'Roles',
-      isGroup: false,
-      icon: 'hugeicons:access',
-      path: 'roles',
-      parentId: headerMenu,
-    },
-  });
-}
-async function createChildRoles(parentId: string) {
-  const existing = await prisma.menu.findMany({ where: { parentId } });
-  if (existing.length > 0) return existing;
-
-  return prisma.menu.createMany({
-    data: [
-      {
-        title: 'Roles',
-        isGroup: false,
-        path: '/roles',
-        order: 0,
-        parentId: parentId,
-      },
-      {
-        title: 'Permissions',
-        isGroup: false,
-        path: '/roles/permissions',
-        order: 1,
-        parentId: parentId,
-      },
-      {
-        title: 'Users',
-        isGroup: false,
-        path: '/roles/users',
-        order: 2,
-        parentId: parentId,
-      },
-    ],
-  });
-}
-
-
-async function getChildRoles() {
-  return prisma.menu.findMany();
-}
-
-// TRX
-// CREATE RolePermissions
 async function createRolePermissions(
   data: { roleId: string; permissionId: string }[],
 ) {
@@ -133,43 +75,6 @@ async function createRolePermissions(
     skipDuplicates: true,
   });
 }
-// CREATE RoleMenus
-async function createRoleMenu(data: { roleId: string; menuId: string }[]) {
-  // console.log(data);
-
-  const existing = await prisma.roleMenu.findMany({
-    where: { roleId: data[0].roleId },
-  });
-
-  if (existing.length > 0) return existing;
-
-  return prisma.roleMenu.createMany({
-    data,
-    skipDuplicates: true,
-  });
-}
-async function createMenuMenuManagement(roleId: string, parentId: string) {
-  const existing = await prisma.menu.findFirst({
-    where: {
-      title: 'Menu Management',
-      parentId,
-    },
-  });
-  if (existing) return existing;
-
-  await prisma.menu.create({
-    data: {
-      title: 'Menu Management',
-      icon: 'icon-park-outline:tree-list',
-      parentId: parentId,
-      isGroup: false,
-      path: '/menus',
-      roles: {
-        create: [{ role: { connect: { id: roleId } } }],
-      },
-    },
-  });
-}
 
 async function createAuthenticationAuthorization() {
   const role = await createRole();
@@ -177,10 +82,6 @@ async function createAuthenticationAuthorization() {
   const userRole = await createUserRole(user.id, role.id);
   await createPermissions();
   const permissions = await getPermissions();
-  const headerMenu = await createRoleHeaderMenu();
-  const parentMenu = await createMenuRole(headerMenu.id);
-  await createChildRoles(parentMenu.id);
-  const menus = await getChildRoles();
   const rolePermissionIds = permissions.map((item) => {
     return {
       roleId: role.id,
@@ -189,35 +90,41 @@ async function createAuthenticationAuthorization() {
   });
   const rolePermissions = await createRolePermissions(rolePermissionIds);
 
-  const menuIds = menus.map((i) => i.id);
-  const allMenuIds = [...menuIds, headerMenu.id, parentMenu.id];
-  const roleMenuIds = allMenuIds.map((i) => {
-    return {
-      roleId: role.id,
-      menuId: i,
-    };
-  });
-  
-  const roleMenus = await createRoleMenu(roleMenuIds);
-  await createMenuMenuManagement(role.id, headerMenu.id);
   console.log({
     role,
     user,
     userRole,
     permissions,
-    headerMenu,
-    parentMenu,
-    menus,
+
     rolePermissions,
-    roleMenus,
   });
-  console.log('✅ Seeding complete.');
 }
 
 async function main() {
   await createAuthenticationAuthorization();
 
+  await insertMenuWithChildren(dataMenus, null);
 
+  await createRoleMenus();
+
+  await createBenefits();
+
+  await createPromotions();
+
+  await createRulePoints();
+
+  await createRankings();
+
+  await createCustomers();
+
+  await createRewards();
+
+  await createLocations();
+
+
+
+
+  console.log('✅ Seeding complete.');
   
 }
 

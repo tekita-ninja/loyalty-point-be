@@ -16,9 +16,8 @@ import { transformUrlPicture } from 'src/common/utils/transform-picture.utils';
 export class BenefitService {
   constructor(
     private prismaService: PrismaService,
-    private fileService: FileService
+    private fileService: FileService,
   ) {}
-  
 
   async findAll() {
     const benefits = await this.prismaService.benefit.findMany({
@@ -30,7 +29,7 @@ export class BenefitService {
       },
     });
 
-    return transformUrlPicture(benefits)
+    return transformUrlPicture(benefits);
   }
 
   async create(data: CreateBenefitDto) {
@@ -57,7 +56,7 @@ export class BenefitService {
 
   async findOne(id: string) {
     await checkDataById<Benefit>(id, this.prismaService.benefit, 'benefit');
-    const benefit =  await this.prismaService.benefit.findUnique({
+    const benefit = await this.prismaService.benefit.findUnique({
       where: {
         id,
       },
@@ -81,12 +80,11 @@ export class BenefitService {
     });
 
     return transformUrlPicture(benefit);
-
   }
 
   async update(id: string, data: UpdateBenefitDto) {
     await checkDataById<Benefit>(id, this.prismaService.benefit, 'benefit');
-     if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
+    if (!(await this.fileService.isFileExistsInUpload(data.urlPicture))) {
       data.urlPicture = await this.fileService.copyFileFromTemp(
         data.urlPicture,
       );
@@ -106,7 +104,6 @@ export class BenefitService {
     });
 
     return transformUrlPicture(benefit);
-
   }
 
   async delete(id: string) {
@@ -122,7 +119,6 @@ export class BenefitService {
     });
 
     return transformUrlPicture(benefit);
-
   }
 
   async search(query: QueryParamDto) {

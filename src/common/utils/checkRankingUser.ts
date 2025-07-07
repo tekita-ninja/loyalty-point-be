@@ -1,4 +1,4 @@
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export async function checkRankingUser(
   userId: string,
@@ -9,8 +9,8 @@ export async function checkRankingUser(
     include: {
       customerPoints: {
         where: {
-            isCancel: 0,
-        }
+          isCancel: 0,
+        },
       },
       ranking: {
         include: {
@@ -24,37 +24,37 @@ export async function checkRankingUser(
     throw new Error('User not found');
   }
 
-  const totalSpending = user.customerPoints?.reduce((sum, cp) => sum + Number(cp.price), 0) || 0;
+  const totalSpending =
+    user.customerPoints?.reduce((sum, cp) => sum + Number(cp.price), 0) || 0;
 
   const eligibleRanking = await prismaService.ranking.findFirst({
     where: {
-        minSpendings: {
-            lte: totalSpending
-        }
+      minSpendings: {
+        lte: totalSpending,
+      },
     },
     orderBy: {
-        minSpendings: 'desc'
-    }
-  })
+      minSpendings: 'desc',
+    },
+  });
 
-  if(eligibleRanking && user.ranking?.id !== eligibleRanking.id) {
-    const updatedUser = await prismaService.user.update({
-        where: { id: userId },
-        data: {
-            rankingId: eligibleRanking.id,
+  if (eligibleRanking && user.ranking?.id !== eligibleRanking.id) {
+    await prismaService.user.update({
+      where: { id: userId },
+      data: {
+        rankingId: eligibleRanking.id,
+      },
+      select: {
+        ranking: {
+          select: {
+            name: true,
+            id: true,
+          },
         },
-        select: {
-            ranking: {
-                select: {
-                    name: true,
-                    id: true,
-                }
-            }
-        }
-    })
+      },
+    });
     return true;
   }
-  
 
   return false;
 }

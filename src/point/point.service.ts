@@ -233,92 +233,92 @@ export class PointService {
       filter.push({ createdBy: query.createdBy });
     }
 
-    const points = await paginate<CustomerPoint, Prisma.CustomerPointFindManyArgs>(
-      this.prismaService.customerPoint,
-      {
-        where: {
-          AND: [...filter],
+    const points = await paginate<
+      CustomerPoint,
+      Prisma.CustomerPointFindManyArgs
+    >(this.prismaService.customerPoint, {
+      where: {
+        AND: [...filter],
+      },
+      orderBy,
+      select: {
+        id: true,
+        rulePointId: true,
+        note: true,
+        price: true,
+        point: true,
+        type: true,
+        isCancel: true,
+        isExpired: true,
+        createdAt: true,
+        createdBy: true,
+        createdByUser: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            phone: true,
+          },
         },
-        orderBy,
-        select: {
-          id: true,
-          rulePointId: true,
-          note: true,
-          price: true,
-          point: true,
-          type: true,
-          isCancel: true,
-          isExpired: true,
-          createdAt: true,
-          createdBy: true,
-          createdByUser: {
-            select: {
-              id: true,
-              firstname: true,
-              lastname: true,
-              email: true,
-              phone: true,
-            },
+        user: {
+          select: {
+            id: true,
+            firstname: true,
+            lastname: true,
+            email: true,
+            gender: true,
+            phone: true,
           },
-          user: {
-            select: {
-              id: true,
-              firstname: true,
-              lastname: true,
-              email: true,
-              gender: true,
-              phone: true,
-            },
+        },
+        rulePoint: {
+          select: {
+            id: true,
+            multiplier: true,
+            name: true,
+            startDate: true,
+            endDate: true,
           },
-          rulePoint: {
-            select: {
-              id: true,
-              multiplier: true,
-              name: true,
-              startDate: true,
-              endDate: true,
-            },
-          },
-          transaction: {
-            select: {
-              id: true,
-              note: true,
-              cutPoint: true,
-              qty: true,
-              reward: {
-                select: {
-                  id: true,
-                  name: true,
-                  price: true,
-                  urlPicture: true,
-                  stocks: true,
-                  startDate: true,
-                  endDate: true,
-                  isLimited: true,
-                  category: {
-                    select: {
-                      id: true,
-                      name: true,
-                    },
+        },
+        transaction: {
+          select: {
+            id: true,
+            note: true,
+            cutPoint: true,
+            qty: true,
+            reward: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                urlPicture: true,
+                stocks: true,
+                startDate: true,
+                endDate: true,
+                isLimited: true,
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
                   },
                 },
               },
-              location: {
-                select: {
-                  id: true,
-                  name: true,
-                  address: true,
-                  latitude: true,
-                  longitude: true,
-                  createdAt: true,
-                  createdBy: true,
-                },
+            },
+            location: {
+              select: {
+                id: true,
+                name: true,
+                address: true,
+                latitude: true,
+                longitude: true,
+                createdAt: true,
+                createdBy: true,
               },
             },
           },
         },
       },
-    );
+    });
 
     return transformUrlPicture(points);
   }

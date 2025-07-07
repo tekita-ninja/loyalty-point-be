@@ -58,8 +58,10 @@ export class RulePointController {
   }
 
   @Get('options/:customerId')
-  async findOptions(@Param('customerId') customerId: string, @Query() query: QueryParamDto) {
+  async findOptions(
+    @Param('customerId') customerId: string,
+    @Query() query: QueryParamDto,
+  ) {
     return await this.rulePointService.findOptions(customerId, query);
   }
-
 }

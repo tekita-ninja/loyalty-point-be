@@ -75,7 +75,7 @@ export class LocationService {
       },
     });
 
-    return transformUrlPicture(location)
+    return transformUrlPicture(location);
   }
 
   async update(id: string, data: UpdateLocationDto) {

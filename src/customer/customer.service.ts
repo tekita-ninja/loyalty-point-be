@@ -143,8 +143,9 @@ export class CustomerService {
     const totalPoint =
       result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0;
 
-    const totalSpendings = 
-      result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) || 0;
+    const totalSpendings =
+      result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) ||
+      0;
 
     return transformUrlPicture({
       ...result,
@@ -252,7 +253,7 @@ export class CustomerService {
             },
             select: {
               point: true,
-              price: true
+              price: true,
             },
           },
         },
@@ -372,7 +373,8 @@ export class CustomerService {
       totalPoint:
         result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
       totalSpendings:
-        result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) || 0,
+        result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) ||
+        0,
     };
 
     const transformedResult = {
@@ -470,7 +472,8 @@ export class CustomerService {
       totalPoint:
         result.customerPoints?.reduce((sum, cp) => sum + cp.point, 0) || 0,
       totalSpendings:
-        result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) || 0,
+        result.customerPoints?.reduce((cum, cp) => cum + Number(cp.price), 0) ||
+        0,
     };
 
     const transformedResult = {

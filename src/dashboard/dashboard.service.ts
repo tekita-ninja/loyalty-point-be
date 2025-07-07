@@ -87,7 +87,7 @@ export class DashboardService {
     const amountLowStockRewards = await this.prismaService.reward.count({
       where: {
         stocks: {
-          lte: 10,
+          lt: 10,
         },
       },
     });

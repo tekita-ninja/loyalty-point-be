@@ -8,7 +8,7 @@ import { createPaginator } from 'prisma-pagination';
 
 @Injectable()
 export class RulePointService {
-  constructor(private prismaService: PrismaService) { }
+  constructor(private prismaService: PrismaService) {}
   async findAll() {
     return await this.prismaService.rulePoint.findMany({
       select: {
@@ -53,7 +53,7 @@ export class RulePointService {
       this.prismaService.rulePoint,
       'rule point',
     );
-    if(!data.startDate || !data.endDate) {
+    if (!data.startDate || !data.endDate) {
       data.startDate = null;
       data.endDate = null;
     }
@@ -222,8 +222,8 @@ export class RulePointService {
           AND: [
             { id: customer.ranking.rulePoint.id },
             { startDate: null },
-            { endDate: null }
-          ]
+            { endDate: null },
+          ],
         });
       }
 
@@ -238,26 +238,24 @@ export class RulePointService {
       console.log(customer.ranking?.rulePoint?.id);
 
       filter.push({ OR: orConditions });
-
     }
 
-      return await paginate<RulePoint, Prisma.RulePointFindManyArgs>(
-        this.prismaService.rulePoint,
-        {
-          where: {
-            AND: [...filter],
-          },
-          orderBy,
-          select: {
-            id: true,
-            isActive: true,
-            name: true,
-            startDate: true,
-            endDate: true,
-            multiplier: true,
-          },
+    return await paginate<RulePoint, Prisma.RulePointFindManyArgs>(
+      this.prismaService.rulePoint,
+      {
+        where: {
+          AND: [...filter],
         },
-      );
-    }
-
+        orderBy,
+        select: {
+          id: true,
+          isActive: true,
+          name: true,
+          startDate: true,
+          endDate: true,
+          multiplier: true,
+        },
+      },
+    );
   }
+}

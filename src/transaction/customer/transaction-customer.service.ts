@@ -18,7 +18,7 @@ export class TransactionCustomerService {
         userId: customerId,
       },
       orderBy: {
-        createdAt: 'desc'
+        createdAt: 'desc',
       },
       select: {
         id: true,
@@ -75,11 +75,9 @@ export class TransactionCustomerService {
         },
       },
     });
-    
-    return transformUrlPicture(transactionCustomer);
 
+    return transformUrlPicture(transactionCustomer);
   }
-  
 
   async confirmTransaction(
     userId: string,
